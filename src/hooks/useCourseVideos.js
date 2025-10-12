@@ -20,42 +20,64 @@ export default function useCourseVideos(courseId) {
 
   const fetchCourse = useCallback(async () => {
     if (!courseId) return;
+    
+    let isMounted = true;
+    
     try {
-      setLoading(true);
+      if (isMounted) setLoading(true);
       const data = await courseAPI.getCourseById(courseId);
-      setCourse(data);
-      setError(null);
+      if (isMounted) {
+        setCourse(data);
+        setError(null);
+      }
     } catch (err) {
-      setError(err?.message || 'Failed to load course');
+      if (isMounted) setError(err?.message || 'Failed to load course');
     } finally {
-      setLoading(false);
+      if (isMounted) setLoading(false);
     }
+
+    return () => {
+      isMounted = false;
+    };
   }, [courseId]);
 
   const fetchCourseVideos = useCallback(async () => {
     if (!courseId) return;
+    
+    let isMounted = true;
+    
     try {
-      setVideosLoading(true);
+      if (isMounted) setVideosLoading(true);
       const data = await adminVideoAPI.getCourseVideos(courseId);
       const sorted = Array.isArray(data) ? data.sort((a, b) => a.order - b.order) : [];
-      setVideos(sorted);
+      if (isMounted) setVideos(sorted);
     } catch (err) {
       // no-op; UI can show empty state
     } finally {
-      setVideosLoading(false);
+      if (isMounted) setVideosLoading(false);
     }
+
+    return () => {
+      isMounted = false;
+    };
   }, [courseId]);
 
   const fetchMuxStatus = useCallback(async () => {
+    let isMounted = true;
+    
     try {
-      setMuxLoading(true);
+      if (isMounted) setMuxLoading(true);
       const status = await videoService.getMuxStatus();
-      setMuxStatus(status);
+      if (isMounted) setMuxStatus(status);
     } catch {
       // ignore
     } finally {
-      setMuxLoading(false);
+      if (isMounted) setMuxLoading(false);
     }
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {

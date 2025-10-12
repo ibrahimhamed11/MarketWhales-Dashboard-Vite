@@ -44,7 +44,7 @@ import { MdEmojiEvents } from "react-icons/md";
 import videoCoursesManagement from "views/admin/videoCoursesManagement";
 import VideoUpload from "views/admin/videoUpload";
 import CourseVideosManagement from "views/admin/CourseVideosManagement";
-import AdminVideos from "views/admin/AdminVideos";
+import VideoPlayerPage from "views/admin/VideoPlayerPage";
 import CoursePage from "views/user/CoursePage";
 import { MdVideoLibrary, MdPlayCircle, MdCloudUpload } from "react-icons/md";
 
@@ -101,12 +101,13 @@ const routes = [
     hidden: true, // Hidden from sidebar
   },
   {
-    name: "Mux Video Management",
+    name: "Video Player",
     layout: "/admin",
-    path: "/mux-videos/:courseId",
-    component: AdminVideos,
+    path: "/video-player/:courseId/:videoId",
+    component: VideoPlayerPage,
     hidden: true, // Hidden from sidebar
   },
+
 
   {
     name: "Signals",

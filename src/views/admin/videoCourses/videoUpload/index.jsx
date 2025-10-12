@@ -1,10 +1,10 @@
 import { Box } from "@chakra-ui/react";
-import UserDataTable from './components/coursesTable';
+import VideoUploadForm from '../videoCourses/components/VideoUploadForm';
 
-export default function Overview() {
+export default function VideoUpload() {
   return (
     <Box pt={{ xs: "130px", md: "80px", xl: "80px" }} px={{ xs: 1, sm: 1 }}>
-      <UserDataTable />
+      <VideoUploadForm />
     </Box>
   );
 }

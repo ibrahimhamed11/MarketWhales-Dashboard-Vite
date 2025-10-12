@@ -343,7 +343,7 @@ const handleVIPToggle = async (userId, isVIP) => {
     <ThemeProvider theme={theme}>
                   <Toast position="top-right" autoClose={3000} closeButton={false} />
 
-      <Box pt={{ base: "130px", md: "80px", xl: "80px" }}>
+      <Box >
         <MaterialReactTable
           columns={customColumns}
           data={userData}

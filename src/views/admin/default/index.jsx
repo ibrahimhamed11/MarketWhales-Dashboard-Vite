@@ -139,7 +139,7 @@ export default function UserReports() {
   };
 
   return (
-    <Box pt={{ base: "130px", md: "80px", xl: "80px" }}>
+    <Box >
       {loading ? (
         <Flex justifyContent="center" alignItems="center" height="100vh">
           <Spinner size="xl" />

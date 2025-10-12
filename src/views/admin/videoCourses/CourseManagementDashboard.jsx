@@ -32,8 +32,8 @@ import {
 } from "@chakra-ui/react";
 
 // Import Chakra components
-import MiniStatistics from '../../components/card/MiniStatistics';
-import IconBox from '../../components/icons/IconBox';
+import MiniStatistics from '../../../components/card/MiniStatistics';
+import IconBox from '../../../components/icons/IconBox';
 
 // Icons
 import {
@@ -50,8 +50,8 @@ import {
 // React Icons for Chakra UI cards
 import { MdClass, MdSchool, MdVideoLibrary, MdOndemandVideo } from "react-icons/md";
 
-import useCoursesManagement from '../../hooks/useCoursesManagement';
-import muiTheme from '../../theme/muiTheme';
+import useCoursesManagement from '../../../hooks/useCoursesManagement';
+import muiTheme from '../../../theme/muiTheme';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
@@ -93,7 +93,7 @@ const CourseManagementDashboard = () => {
   if (loading) {
     return (
       <ThemeProvider theme={muiTheme}>
-        <Container maxWidth="xl" sx={{ pt: { xs: "130px", md: "80px", xl: "80px" }, px: { xs: 2, sm: 3 } }}>
+        <Container maxWidth="xl" sx={{ pt: { xs: "130px", md: "80px", xl: "80px" }, px: { xs: 1, sm: 1 } }}>
           <Box sx={{ 
             display: 'flex', 
             justifyContent: 'center', 
@@ -115,7 +115,7 @@ const CourseManagementDashboard = () => {
   if (error) {
     return (
       <ThemeProvider theme={muiTheme}>
-        <Container maxWidth="xl" sx={{ pt: { xs: "130px", md: "80px", xl: "80px" }, px: { xs: 2, sm: 3 } }}>
+        <Container maxWidth="xl" sx={{ pt: { xs: "130px", md: "80px", xl: "80px" }, px: { xs: 1, sm: 1 } }}>
       <Alert 
             severity="error" 
             action={

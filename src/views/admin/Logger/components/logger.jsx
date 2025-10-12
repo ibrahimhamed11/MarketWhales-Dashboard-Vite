@@ -68,7 +68,7 @@ const Logger = () => {
   return (
     <ThemeProvider theme={theme}>
       <Toast position="top-right" autoClose={3000} closeButton={false} />
-      <Box pt={{ base: "130px", md: "80px", xl: "80px" }}>
+      <Box >
         <Button 
                 color="secondary"
                 variant="contained"

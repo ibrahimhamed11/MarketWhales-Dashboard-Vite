@@ -24,7 +24,6 @@ import {
 import { MdUpload, MdVideoFile, MdCheckCircle, MdArrowBack } from 'react-icons/md';
 import Card from 'components/card/Card';
 import { adminVideoAPI } from '../../../../apis/courses/videosCourses';
-import { videoService } from '../../../../apis/mux/videoApi';
 
 const VideoUploadForm = () => {
   const history = useHistory();
@@ -114,33 +113,7 @@ const VideoUploadForm = () => {
     handleFileSelect(event);
   };
 
-  const uploadFile = async (uploadUrl, file) => {
-    return new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
 
-      xhr.upload.addEventListener('progress', (event) => {
-        if (event.lengthComputable) {
-          const progress = Math.round((event.loaded / event.total) * 100);
-          setUploadProgress(progress);
-        }
-      });
-
-      xhr.addEventListener('load', () => {
-        if (xhr.status === 200 || xhr.status === 201) {
-          resolve();
-        } else {
-          reject(new Error(`Upload failed with status ${xhr.status}`));
-        }
-      });
-
-      xhr.addEventListener('error', () => {
-        reject(new Error('Upload failed'));
-      });
-
-      xhr.open('PUT', uploadUrl);
-      xhr.send(file);
-    });
-  };
 
   const handleUpload = async () => {
     if (!selectedFile || !formData.title.trim()) {
@@ -153,96 +126,37 @@ const VideoUploadForm = () => {
       setError('');
       setUploadProgress(0);
 
-      // Try Mux upload first, fallback to regular upload
-      let uploadSuccess = false;
-      
-      try {
-        // Step 1: Create Mux direct upload URL
-        const muxVideoData = {
-          title: formData.title,
-          description: formData.description,
-          order: formData.order
-        };
-        
-        const uploadResponse = await videoService.createDirectUpload(courseId, muxVideoData);
-        const { uploadUrl, videoId } = uploadResponse;
+      // Regular upload without Mux
+      const uploadData = new FormData();
+      uploadData.append('video', selectedFile);
+      uploadData.append('title', formData.title);
+      uploadData.append('description', formData.description);
+      uploadData.append('order', formData.order.toString());
+      uploadData.append('isActive', formData.isActive.toString());
+      uploadData.append('category', formData.category);
+      uploadData.append('difficulty', formData.difficulty);
 
-        // Step 2: Upload file to Mux
-        await uploadFile(uploadUrl, selectedFile);
-
-        // Step 3: Poll for upload completion
-        let attempts = 0;
-        const maxAttempts = 60; // 5 minutes (5 second intervals)
-
-        const pollStatus = async () => {
-          try {
-            const statusResponse = await videoService.checkUploadStatus(videoId);
-            const { video, asset } = statusResponse;
-
-            if (asset && asset.status === 'ready') {
-              setUploadComplete(true);
-              uploadSuccess = true;
-              
-              // Navigate back to video courses management after 2 seconds
-              setTimeout(() => {
-                history.push('/admin/video-courses');
-              }, 2000);
-              
-            } else if (asset && asset.status === 'errored') {
-              throw new Error('Mux video processing failed');
-            } else {
-              attempts++;
-              if (attempts < maxAttempts) {
-                setTimeout(pollStatus, 5000); // Check every 5 seconds
-              } else {
-                throw new Error('Video processing timeout');
-              }
-            }
-          } catch (error) {
-            console.error('Mux status check error:', error);
-            throw error;
+      const result = await adminVideoAPI.uploadVideo(
+        courseId,
+        uploadData,
+        (progressEvent) => {
+          if (progressEvent.total) {
+            const percentCompleted = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total
+            );
+            setUploadProgress(percentCompleted);
+          } else {
+            setUploadProgress(50);
           }
-        };
+        }
+      );
 
-        // Start polling
-        setTimeout(pollStatus, 2000);
+      setUploadComplete(true);
 
-      } catch (muxError) {
-        console.log('Mux upload failed, falling back to regular upload:', muxError);
-        
-        // Fallback to regular upload
-        const uploadData = new FormData();
-        uploadData.append('video', selectedFile);
-        uploadData.append('title', formData.title);
-        uploadData.append('description', formData.description);
-        uploadData.append('order', formData.order.toString());
-        uploadData.append('isActive', formData.isActive.toString());
-        uploadData.append('category', formData.category);
-        uploadData.append('difficulty', formData.difficulty);
-
-        const result = await adminVideoAPI.uploadVideo(
-          courseId,
-          uploadData,
-          (progressEvent) => {
-            if (progressEvent.total) {
-              const percentCompleted = Math.round(
-                (progressEvent.loaded * 100) / progressEvent.total
-              );
-              setUploadProgress(percentCompleted);
-            } else {
-              setUploadProgress(50);
-            }
-          }
-        );
-
-        setUploadComplete(true);
-        uploadSuccess = true;
-
-        // Navigate back to video courses management after 2 seconds
-        setTimeout(() => {
-          history.push('/admin/video-courses');
-        }, 2000);
-      }
+      // Navigate back to video courses management after 2 seconds
+      setTimeout(() => {
+        history.push('/admin/video-courses');
+      }, 2000);
       
     } catch (error) {
       console.error('Upload failed:', error);
@@ -250,9 +164,7 @@ const VideoUploadForm = () => {
       setError(errorMessage);
       
     } finally {
-      if (!uploadSuccess) {
-        setUploading(false);
-      }
+      setUploading(false);
     }
   };
 
@@ -304,7 +216,7 @@ const VideoUploadForm = () => {
             Upload Complete!
           </Text>
           <Text color="secondaryGray.600" textAlign="center">
-            Your video "{formData.title}" has been uploaded successfully and is being processed by Mux for optimal streaming.
+            Your video "{formData.title}" has been uploaded successfully.
           </Text>
           <HStack spacing="20px">
             <Button 
@@ -335,7 +247,7 @@ const VideoUploadForm = () => {
           <HStack spacing="10px">
             <Icon as={MdVideoFile} w="24px" h="24px" color={brandColor} />
             <Text fontSize="lg" fontWeight="bold" color={textColor}>
-              Upload Video (Mux Powered)
+              Upload Video
             </Text>
           </HStack>
           <Button 
@@ -363,7 +275,7 @@ const VideoUploadForm = () => {
           <VStack spacing="15px">
             <Icon as={MdUpload} w="40px" h="40px" color={brandColor} />
             <Text fontWeight="bold" color={textColor}>
-              Select Video File for Mux Upload
+              Select Video File
             </Text>
             
             <Input
@@ -392,7 +304,7 @@ const VideoUploadForm = () => {
             )}
             
             <Text fontSize="xs" color="secondaryGray.600" textAlign="center">
-              Supported formats: MP4, WebM, OGG, MOV • Videos will be processed by Mux for optimal streaming • Max size: 500MB
+              Supported formats: MP4, WebM, OGG, MOV • Max size: 500MB
             </Text>
           </VStack>
         </Card>

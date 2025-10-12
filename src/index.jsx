@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import "assets/css/App.css";
-import "styles/video-components.css";
+
 import {
   BrowserRouter as Router,
   Route,

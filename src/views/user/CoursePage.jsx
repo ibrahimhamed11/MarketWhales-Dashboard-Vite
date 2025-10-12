@@ -49,7 +49,7 @@ const CoursePage = () => {
   };
 
   return (
-    <Box pt={{ base: "130px", md: "80px", xl: "80px" }}>
+    <Box pt={{ base: "130px", md: "80px", xl: "80px" }} px={{ xs: 1, sm: 1 }}>
       <Text fontSize="2xl" fontWeight="bold" mb={6}>
         Course Videos
       </Text>

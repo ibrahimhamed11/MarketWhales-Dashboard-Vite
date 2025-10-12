@@ -7,7 +7,8 @@ import {
   Text,
   Progress,
   VStack,
-  useColorModeValue
+  useColorModeValue,
+  Container
 } from '@chakra-ui/react';
 import VideoList from '../../components/mux/VideoList';
 import MuxPlayer from '../../components/MuxPlayer';
@@ -49,7 +50,7 @@ const CoursePage = () => {
   };
 
   return (
-    <Box >
+    <Container maxWidth="xl" pt={{ base: "130px", md: "80px", xl: "80px" }} px={{ xs: 1, sm: 1 }}>
       <Text fontSize="2xl" fontWeight="bold" mb={6}>
         Course Videos
       </Text>
@@ -113,7 +114,7 @@ const CoursePage = () => {
           </Box>
         </GridItem>
       </Grid>
-    </Box>
+    </Container>
   );
 };
 

@@ -283,6 +283,21 @@ export const adminVideoAPI = {
     }
   },
 
+  // Get video by ID
+  getVideoById: async (videoId) => {
+    try {
+      const token = getTokenFromLocalStorage();
+      const response = await axiosInstance.get(`/admin/videos/${videoId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   // Check if admin video stream is available (for testing/demo purposes)
   checkAdminVideoStreamAvailability: async (videoId) => {
     try {

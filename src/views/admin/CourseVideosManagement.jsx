@@ -49,8 +49,6 @@ import useCourseVideos from '../../hooks/useCourseVideos';
 import { formatDuration, formatFileSize } from '../../utils/courses/videoUtils';
 import VideoAnalyticsModal from '../../components/modal/VideoAnalyticsModal';
 import VideoPlayerModal from '../../components/modal/VideoPlayerModal';
-import MuxVideoPlayer from '../../components/mux/MuxVideoPlayer';
-import InlineVideoPlayer from '../../components/video/InlineVideoPlayer';
 import muiTheme from '../../theme/muiTheme';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
@@ -73,12 +71,10 @@ const CourseVideosManagement = () => {
 
   // UI state
   const [viewMode, setViewMode] = useState('grid');
-  const [showInlinePlayer, setShowInlinePlayer] = useState(false);
 
   // Video player modal state
   const [videoPlayerOpen, setVideoPlayerOpen] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState(null);
-  const [inlineSelectedVideo, setInlineSelectedVideo] = useState(null);
 
   // Analytics modal state
   const [analyticsModalOpen, setAnalyticsModalOpen] = useState(false);
@@ -111,9 +107,8 @@ const CourseVideosManagement = () => {
     setVideoPlayerOpen(true);
   };
 
-  const handlePlayInline = (video) => {
-    setInlineSelectedVideo(video);
-    setShowInlinePlayer(true);
+  const handlePlayVideoNewPage = (video) => {
+    history.push(`/admin/video-player/${courseId}/${video._id}`);
   };
 
   const handleUploadClick = () => {
@@ -136,7 +131,7 @@ const CourseVideosManagement = () => {
   if (loading) {
     return (
       <ThemeProvider theme={muiTheme}>
-        <Container maxWidth="xl" sx={{ pt: { base: "130px", md: "80px", xl: "80px" } }}>
+        <Container maxWidth="xl">
           <Box sx={{ 
             display: 'flex', 
             justifyContent: 'center', 
@@ -155,7 +150,7 @@ const CourseVideosManagement = () => {
   if (error) {
     return (
       <ThemeProvider theme={muiTheme}>
-        <Container maxWidth="xl" sx={{ pt: { base: "130px", md: "80px", xl: "80px" } }}>
+        <Container maxWidth="xl">
           <Alert 
             severity="error" 
             action={
@@ -173,28 +168,38 @@ const CourseVideosManagement = () => {
 
   return (
     <ThemeProvider theme={muiTheme}>
-      <Container maxWidth="xl" sx={{ pt: { base: "130px", md: "80px", xl: "80px" } }}>
+      <Container maxWidth="xl" sx={{ pt: 3 }}>
         
         {/* Header Section */}
-        <Box sx={{ mt: 6 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
+        <Box>
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: { xs: 'flex-start', sm: 'center' }, 
+            mb: 4,
+            flexDirection: { xs: 'column', sm: 'row' },
+            gap: { xs: 2, sm: 0 }
+          }}>
             <Button
               startIcon={<ArrowBackIcon />}
               onClick={() => history.push('/admin/video-courses')}
-              sx={{ mr: 2 }}
+              sx={{ 
+                mr: { sm: 2 },
+                textTransform: 'capitalize'
+              }}
             >
-              Back to Courses
+              Back to courses
             </Button>
             
-            <Box sx={{ flex: 1 }}>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
               <Typography variant="h5" sx={{ 
                 mb: 1, 
                 fontWeight: 700, 
                 fontFamily: getFontFamily(course?.name),
                 wordWrap: 'break-word',
-                overflow: 'visible'
+                overflow: 'visible',
+                fontSize: { xs: '1.25rem', sm: '1.5rem' }
               }}>
-                {course?.name} - Videos Management
+                {course?.name} - Videos management
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ 
                 fontFamily: getFontFamily(`Manage videos for this course (${videos.length} videos)`),
@@ -205,24 +210,23 @@ const CourseVideosManagement = () => {
               </Typography>
             </Box>
             
-            <Stack direction="row" spacing={2}>
+            <Stack direction="row" spacing={2} sx={{ width: { xs: '100%', sm: 'auto' } }}>
               <Button
                 variant="contained"
-                size="large"
+                size="medium"
                 startIcon={<UploadIcon />}
                 onClick={handleUploadClick}
-                sx={{ borderRadius: 3, px: 3, py: 1.5 }}
+                sx={{ 
+                  borderRadius: 2, 
+                  px: 2, 
+                  py: 1, 
+                  minWidth: '120px',
+                  fontSize: '0.875rem',
+                  textTransform: 'capitalize',
+                  width: { xs: '100%', sm: 'auto' }
+                }}
               >
-                Upload New Video (Mux)
-              </Button>
-              <Button
-                variant="outlined"
-                size="large"
-                startIcon={<VideoLibraryIcon />}
-                onClick={() => history.push(`/admin/mux-videos/${courseId}`)}
-                sx={{ borderRadius: 3, px: 2, py: 1.5 }}
-              >
-                Mux Dashboard
+                Upload new video
               </Button>
             </Stack>
           </Box>
@@ -307,20 +311,7 @@ const CourseVideosManagement = () => {
                           size="small"
                         />
                       )}
-                      {muxStatus && (
-                        <Chip
-                          label={`Mux: ${muxStatus.status === 'operational' ? '✅ Active' : '❌ Inactive'}`}
-                          color={muxStatus.status === 'operational' ? 'success' : 'error'}
-                          size="small"
-                        />
-                      )}
-                      {muxLoading && (
-                        <Chip
-                          label="Checking Mux..."
-                          variant="outlined"
-                          size="small"
-                        />
-                      )}
+
                     </Box>
                   </Box>
                 </Box>
@@ -337,7 +328,9 @@ const CourseVideosManagement = () => {
             alignItems: 'center', 
             mb: 4,
             mt: 4,
-            flexWrap: 'wrap'
+            flexWrap: 'wrap',
+            flexDirection: { xs: 'column', sm: 'row' },
+            alignItems: { xs: 'stretch', sm: 'center' }
           }}>
             <TextField
               size="small"
@@ -347,10 +340,16 @@ const CourseVideosManagement = () => {
               InputProps={{
                 startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />
               }}
-              sx={{ minWidth: 250 }}
+              sx={{ 
+                minWidth: { xs: '100%', sm: 250 },
+                flex: { xs: 1, sm: 'none' }
+              }}
             />
             
-            <FormControl size="small" sx={{ minWidth: 150 }}>
+            <FormControl size="small" sx={{ 
+              minWidth: { xs: '100%', sm: 150 },
+              flex: { xs: 1, sm: 'none' }
+            }}>
               <InputLabel>Sort by</InputLabel>
               <Select
                 value={sortBy}
@@ -359,27 +358,33 @@ const CourseVideosManagement = () => {
               >
                 <MenuItem value="order">Order</MenuItem>
                 <MenuItem value="title">Title</MenuItem>
-                <MenuItem value="uploadedAt">Upload Date</MenuItem>
+                <MenuItem value="uploadedAt">Upload date</MenuItem>
               </Select>
             </FormControl>
             
-            <FormControl size="small" sx={{ minWidth: 150 }}>
+            <FormControl size="small" sx={{ 
+              minWidth: { xs: '100%', sm: 150 },
+              flex: { xs: 1, sm: 'none' }
+            }}>
               <InputLabel>Status</InputLabel>
               <Select
                 value={statusFilter}
                 label="Status"
                 onChange={(e) => setStatusFilter(e.target.value)}
               >
-                <MenuItem value="all">All Videos</MenuItem>
-                <MenuItem value="active">Active Only</MenuItem>
-                <MenuItem value="inactive">Inactive Only</MenuItem>
+                <MenuItem value="all">All videos</MenuItem>
+                <MenuItem value="active">Active only</MenuItem>
+                <MenuItem value="inactive">Inactive only</MenuItem>
               </Select>
             </FormControl>
 
             <Tooltip title="Toggle view mode">
               <IconButton 
                 onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
-                sx={{ ml: 'auto' }}
+                sx={{ 
+                  ml: { xs: 0, sm: 'auto' },
+                  alignSelf: { xs: 'center', sm: 'auto' }
+                }}
               >
                 {viewMode === 'grid' ? <ViewListIcon /> : <GridViewIcon />}
               </IconButton>
@@ -387,13 +392,7 @@ const CourseVideosManagement = () => {
           </Box>
         )}
 
-        {/* Inline Video Player Section */}
-        {showInlinePlayer && inlineSelectedVideo && (
-          <InlineVideoPlayer 
-            video={inlineSelectedVideo}
-            onClose={() => setShowInlinePlayer(false)}
-          />
-        )}
+
 
         {/* Videos Content */}
     {videosLoading ? (
@@ -421,14 +420,15 @@ const CourseVideosManagement = () => {
               startIcon={<UploadIcon />}
               onClick={handleUploadClick}
               size="large"
+              sx={{ textTransform: 'capitalize' }}
             >
-              Upload First Video
+              Upload first video
             </Button>
           </Paper>
         ) : (
           <Grid container spacing={3}>
             {filteredVideos.map(video => (
-              <Grid item xs={12} md={viewMode === 'grid' ? 6 : 12} lg={viewMode === 'grid' ? 4 : 12} key={video._id}>
+              <Grid item xs={12} sm={viewMode === 'grid' ? 6 : 12} md={viewMode === 'grid' ? 4 : 12} lg={viewMode === 'grid' ? 3 : 12} key={video._id}>
                 <Card sx={{ 
                   height: '100%',
                   '&:hover': { boxShadow: 4 }
@@ -540,7 +540,6 @@ const CourseVideosManagement = () => {
                         transform: 'translate(-50%, -50%)',
                         bgcolor: 'rgba(0,0,0,0.7)',
                         color: 'white',
-                        '&:hover': { bgcolor: 'rgba(0,0,0,0.9)' },
                         transition: 'all 0.3s ease',
                         '&:hover': { 
                           bgcolor: 'rgba(0,0,0,0.9)',
@@ -594,27 +593,46 @@ const CourseVideosManagement = () => {
                     </Box>
                   </CardContent>
                   
-                  <CardActions sx={{ px: 2, pb: 2 }}>
+                  <CardActions sx={{ 
+                    p: 1, 
+                    gap: 0.5, 
+                    flexWrap: 'wrap',
+                    justifyContent: { xs: 'center', sm: 'flex-start' }
+                  }}>
                     <Button
                       onClick={() => handlePlayVideo(video)}
                       variant="contained"
                       size="small"
                       startIcon={<PlayArrowIcon />}
                       color="primary"
-                      sx={{ mr: 1 }}
+                      sx={{ 
+                        minWidth: { xs: '70px', sm: '75px' },
+                        fontSize: '0.75rem',
+                        px: 1,
+                        py: 0.5,
+                        height: '28px',
+                        textTransform: 'capitalize'
+                      }}
                     >
-                      Play Modal
+                      Play modal
                     </Button>
                     
                     <Button
-                      onClick={() => handlePlayInline(video)}
+                      onClick={() => handlePlayVideoNewPage(video)}
                       variant="outlined"
                       size="small"
                       startIcon={<PlayCircleFilledIcon />}
                       color="primary"
-                      sx={{ mr: 1 }}
+                      sx={{ 
+                        minWidth: { xs: '75px', sm: '80px' },
+                        fontSize: '0.75rem',
+                        px: 1,
+                        py: 0.5,
+                        height: '28px',
+                        textTransform: 'capitalize'
+                      }}
                     >
-                      Play Here
+                      New page
                     </Button>
                     
                     <Button
@@ -623,6 +641,14 @@ const CourseVideosManagement = () => {
                       size="small"
                       startIcon={video.isActive ? <VisibilityOffIcon /> : <VisibilityIcon />}
                       color={video.isActive ? 'warning' : 'success'}
+                      sx={{ 
+                        minWidth: { xs: '60px', sm: '65px' },
+                        fontSize: '0.75rem',
+                        px: 1,
+                        py: 0.5,
+                        height: '28px',
+                        textTransform: 'capitalize'
+                      }}
                     >
                       {video.isActive ? 'Hide' : 'Show'}
                     </Button>
@@ -641,8 +667,16 @@ const CourseVideosManagement = () => {
                       variant="outlined"
                       size="small"
                       startIcon={<BarChartIcon />}
+                      sx={{ 
+                        minWidth: { xs: '70px', sm: '75px' },
+                        fontSize: '0.75rem',
+                        px: 1,
+                        py: 0.5,
+                        height: '28px',
+                        textTransform: 'capitalize'
+                      }}
                     >
-                      Analytics
+                      Stats
                     </Button>
                     
                     <Button
@@ -651,6 +685,14 @@ const CourseVideosManagement = () => {
                       size="small"
                       startIcon={<DeleteIcon />}
                       color="error"
+                      sx={{ 
+                        minWidth: { xs: '60px', sm: '65px' },
+                        fontSize: '0.75rem',
+                        px: 1,
+                        py: 0.5,
+                        height: '28px',
+                        textTransform: 'capitalize'
+                      }}
                     >
                       Delete
                     </Button>

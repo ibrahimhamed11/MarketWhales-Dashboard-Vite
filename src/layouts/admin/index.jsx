@@ -8,7 +8,8 @@ import { SidebarContext } from '../../contexts/SidebarContext';
 import React, { useState } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import routes from '../../routes.jsx';
-import VideoUpload from '../../views/admin/videoUpload';
+import VideoUpload from '../../views/admin/videoCourses/VideoUpload';
+import VideoPlayerPage from '../../views/admin/VideoPlayerPage';
 
 // Custom Chakra theme
 export default function Dashboard(props) {
@@ -18,10 +19,23 @@ export default function Dashboard(props) {
 	const [ toggleSidebar, setToggleSidebar ] = useState(false);
 	// functions for changing the states from components
 	const getRoute = () => {
-		return window.location.pathname !== '/admin/full-screen-maps';
+		return window.location.pathname !== '/admin/full-screen-maps' && !window.location.pathname.includes('/video-player/');
 	};
 	const getActiveRoute = (routes) => {
-		let activeRoute = 'Default Brand Text';
+		let activeRoute = 'Market Whales Dashboard';
+		
+		// Handle specific video upload routes
+		const currentPath = window.location.pathname;
+		if (currentPath.includes('/upload-video/') && currentPath !== '/admin/video-upload') {
+			return 'Upload Video for Course';
+		}
+		if (currentPath.includes('/course-videos/')) {
+			return 'Course Videos Management';
+		}
+		if (currentPath.includes('/video-player/')) {
+			return 'Video Player';
+		}
+		
 		for (let i = 0; i < routes.length; i++) {
 			if (routes[i].collapse) {
 				let collapseActiveRoute = getActiveRoute(routes[i].items);
@@ -143,7 +157,7 @@ export default function Dashboard(props) {
 						</Portal>
 
 						{getRoute() ? (
-							<Box mx='auto' p={{ base: '20px', md: '30px' }} pe='20px' minH='100vh' pt='50px'>
+							<Box mx='auto' p={{ base: '20px', md: '30px' }} pe='20px' minH='100vh' pt={{ base: '130px', md: '110px', xl: '110px' }}>
 								<Switch>
 									{/* Dynamic route for video upload with course ID - must come before general routes */}
 									<Route path='/admin/upload-video/:courseId' component={VideoUpload} />
@@ -151,7 +165,14 @@ export default function Dashboard(props) {
 									<Redirect from='/' to='/admin/default' />
 								</Switch>
 							</Box>
-						) : null}
+						) : (
+							<Switch>
+								{/* Routes that don't need the standard layout padding (full-screen routes) */}
+								<Route path='/admin/video-player/:courseId/:videoId' component={VideoPlayerPage} />
+								{getRoutes(routes)}
+								<Redirect from='/' to='/admin/default' />
+							</Switch>
+						)}
 						<Box>
 							<Footer />
 						</Box>

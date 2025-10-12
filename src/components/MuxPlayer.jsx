@@ -1,36 +1,76 @@
 import React, { useState, useEffect } from 'react';
-import MuxPlayer from '@mux/mux-player-react';
-import { 
-  Box, 
-  IconButton, 
-  Alert, 
-  AlertIcon,
-  Spinner, 
-  Text, 
-  Modal, 
-  ModalOverlay, 
-  ModalContent,
-  ModalCloseButton
-} from '@chakra-ui/react';
-import { ExternalLinkIcon } from '@chakra-ui/icons';
-import videoService from '../apis/mux/videoApi';
-import { generateDeviceFingerprint } from '../utils/courses/videoUtils';
+import { videoService } from '../apis/mux/videoApi';
 
-// Single, clean Mux player component with new screen option
+const playerContainerStyle = {
+  position: 'relative',
+  width: '100%',
+  background: 'black',
+  borderRadius: '8px',
+  overflow: 'hidden'
+};
+
+const loadingContainerStyle = {
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  minHeight: '200px',
+  flexDirection: 'column',
+  gap: '16px',
+  color: 'white'
+};
+
+const spinnerStyle = {
+  width: '40px',
+  height: '40px',
+  border: '3px solid rgba(255, 255, 255, 0.3)',
+  borderTop: '3px solid white',
+  borderRadius: '50%',
+  animation: 'spin 1s linear infinite'
+};
+
+const errorContainerStyle = {
+  background: '#ffebee',
+  border: '1px solid #f44336',
+  color: '#c62828',
+  padding: '16px',
+  borderRadius: '8px',
+  textAlign: 'center'
+};
+
+const videoElementStyle = {
+  width: '100%',
+  height: 'auto',
+  minHeight: '300px',
+  background: 'black'
+};
+
+// Add CSS for spinner animation
+const spinnerKeyframes = `
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+`;
+
+// Inject the keyframes into the document head if not already present
+if (!document.querySelector('#spinner-keyframes')) {
+  const style = document.createElement('style');
+  style.id = 'spinner-keyframes';
+  style.textContent = spinnerKeyframes;
+  document.head.appendChild(style);
+}
+
+// Simple Mux player component
 const MuxPlayerComponent = ({ 
   videoId, 
   onProgress, 
   onError,
   onEnded,
-  autoPlay = false, 
-  style = {},
-  showNewScreenButton = true,
-  ...props 
+  autoPlay = false
 }) => {
   const [streamData, setStreamData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isNewScreen, setIsNewScreen] = useState(false);
 
   useEffect(() => {
     if (videoId) {
@@ -43,24 +83,11 @@ const MuxPlayerComponent = ({
       setLoading(true);
       setError(null);
       
-      console.log('Loading video stream for videoId:', videoId);
-      
-      // Try Mux admin stream first, fallback to user stream
-      let data;
-      try {
-        data = await videoService.getAdminVideoStream(videoId);
-        console.log('Admin stream data:', data);
-      } catch (adminError) {
-        console.log('Admin stream failed, trying user stream:', adminError);
-        const deviceFingerprint = generateDeviceFingerprint();
-        data = await videoService.getVideoStreamUrl(videoId, deviceFingerprint);
-        console.log('User stream data:', data);
-      }
-      
+      const data = await videoService.getAdminVideoStream(videoId);
       setStreamData(data);
     } catch (err) {
       console.error('Error loading video stream:', err);
-      setError(err.message || 'Failed to load video');
+      setError('Failed to load video');
       onError?.(err);
     } finally {
       setLoading(false);
@@ -81,91 +108,36 @@ const MuxPlayerComponent = ({
     onEnded?.();
   };
 
-  const openInNewScreen = () => {
-    setIsNewScreen(true);
-  };
-
-  const closeNewScreen = () => {
-    setIsNewScreen(false);
-  };
-
-  const PlayerComponent = ({ inModal = false }) => (
-    <Box position="relative" sx={inModal ? {} : style}>
+  return (
+    <div style={playerContainerStyle}>
       {loading && (
-        <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
-          <Spinner size="lg" />
-          <Text ml={3}>Loading video...</Text>
-        </Box>
+        <div style={loadingContainerStyle}>
+          <div style={spinnerStyle} />
+          <span>Loading video...</span>
+        </div>
       )}
       
       {error && (
-        <Alert status="error" mb={4}>
-          <AlertIcon />
+        <div style={errorContainerStyle}>
           {error}
-        </Alert>
+        </div>
       )}
       
-      {streamData && !loading && (
-        <>
-          <MuxPlayer
-            playbackId={streamData.playbackId}
-            streamType={streamData.streamType || 'on-demand'}
-            autoPlay={autoPlay}
-            onProgress={handleProgress}
-            onEnded={handleEnded}
-            style={{
-              width: '100%',
-              height: 'auto',
-              minHeight: inModal ? '70vh' : '300px',
-            }}
-            {...props}
-          />
-          
-          {/* Control buttons */}
-          {showNewScreenButton && !inModal && (
-            <Box
-              position="absolute"
-              top={2}
-              right={2}
-              bg="rgba(0, 0, 0, 0.6)"
-              borderRadius="md"
-              p={1}
-            >
-              <IconButton
-                size="sm"
-                onClick={openInNewScreen}
-                color="white"
-                bg="transparent"
-                _hover={{ bg: 'rgba(255, 255, 255, 0.2)' }}
-                title="Open in new screen"
-                icon={<ExternalLinkIcon />}
-              />
-            </Box>
-          )}
-        </>
-      )}
-    </Box>
-  );
-
-  return (
-    <>
-      {/* Main player */}
-      <PlayerComponent />
-      
-      {/* New screen modal */}
-      <Modal isOpen={isNewScreen} onClose={closeNewScreen} size="full">
-        <ModalOverlay />
-        <ModalContent 
-          bg="black" 
-          m={4}
-          borderRadius="lg"
-          overflow="hidden"
+      {streamData && !loading && !error && (
+        <video
+          style={videoElementStyle}
+          controls
+          autoPlay={autoPlay}
+          onTimeUpdate={handleProgress}
+          onEnded={handleEnded}
+          playsInline
         >
-          <ModalCloseButton color="white" zIndex={1000} />
-          <PlayerComponent inModal={true} />
-        </ModalContent>
-      </Modal>
-    </>
+          <source src={streamData.streamUrl} type="application/x-mpegURL" />
+          <source src={streamData.streamUrl?.replace('.m3u8', '.mp4')} type="video/mp4" />
+          Your browser does not support this video format.
+        </video>
+      )}
+    </div>
   );
 };
 

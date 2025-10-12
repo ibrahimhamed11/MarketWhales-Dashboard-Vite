@@ -173,7 +173,7 @@ setCompanyId("")
 
   return (
     <ThemeProvider theme={theme}>
-      <Box pt={{ base: "130px", md: "80px", xl: "80px" }}>
+      <Box >
         <MaterialReactTable
           columns={customColumns}
           data={companiesData}
