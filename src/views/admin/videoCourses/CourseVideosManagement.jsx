@@ -45,11 +45,11 @@ import {
   ViewList as ViewListIcon
 } from '@mui/icons-material';
 
-import useCourseVideos from '../../hooks/useCourseVideos';
-import { formatDuration, formatFileSize } from '../../utils/courses/videoUtils';
-import VideoAnalyticsModal from '../../components/modal/VideoAnalyticsModal';
-import VideoPlayerModal from '../../components/modal/VideoPlayerModal';
-import muiTheme from '../../theme/muiTheme';
+import useCourseVideos from '../../../hooks/useCourseVideos';
+import { formatDuration, formatFileSize } from '../../../utils/courses/videoUtils';
+import VideoAnalyticsModal from '../../../components/modal/VideoAnalyticsModal';
+import VideoPlayerModal from '../../../components/modal/VideoPlayerModal';
+import muiTheme from '../../../theme/muiTheme';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
@@ -168,7 +168,7 @@ const CourseVideosManagement = () => {
 
   return (
     <ThemeProvider theme={muiTheme}>
-      <Container maxWidth="xl" sx={{ pt: 3 }}>
+      <Container maxWidth="xl" sx={{ pt: { xs: "130px", md: "80px", xl: "80px" }, px: { xs: 1, sm: 1 } }}>
         
         {/* Header Section */}
         <Box>
@@ -656,7 +656,7 @@ const CourseVideosManagement = () => {
                     <Button
                       onClick={() => {
                         // Defer fetch until modal is opened; keep existing behavior
-                        import('../../apis/courses/videosCourses').then(({ adminVideoAPI }) => {
+                        import('../../../apis/courses/videosCourses').then(({ adminVideoAPI }) => {
                           adminVideoAPI.getVideoAnalytics(video._id).then((analytics) => {
                             setSelectedVideoAnalytics(analytics);
                             setSelectedVideoTitle(video.title);

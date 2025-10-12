@@ -43,8 +43,8 @@ import CompetitionsTable from "views/admin/Competitions";
 import { MdEmojiEvents } from "react-icons/md";
 import videoCoursesManagement from "views/admin/videoCoursesManagement";
 import VideoUpload from "views/admin/videoUpload";
-import CourseVideosManagement from "views/admin/CourseVideosManagement";
-import VideoPlayerPage from "views/admin/VideoPlayerPage";
+import CourseVideosManagement from "views/admin/videoCourses/CourseVideosManagement";
+import VideoPlayerPage from "views/admin/videoCourses/VideoPlayerPage";
 import CoursePage from "views/user/CoursePage";
 import { MdVideoLibrary, MdPlayCircle, MdCloudUpload } from "react-icons/md";
 
@@ -85,6 +85,8 @@ const routes = [
     icon: <Icon as={MdCloudUpload} width="20px" height="20px" color="inherit" />,
     path: "/video-upload",
     component: VideoUpload,
+        hidden: true, // Hidden from sidebar
+
   },
   {
     name: "Upload Video for Course",

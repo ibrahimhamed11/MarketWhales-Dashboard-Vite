@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import routes from '../../routes.jsx';
 import VideoUpload from '../../views/admin/videoCourses/VideoUpload';
-import VideoPlayerPage from '../../views/admin/VideoPlayerPage';
+import VideoPlayerPage from '../../views/admin/videoCourses/VideoPlayerPage';
 
 // Custom Chakra theme
 export default function Dashboard(props) {

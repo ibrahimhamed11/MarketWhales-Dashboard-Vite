@@ -22,7 +22,7 @@ import {
 import { adminVideoAPI } from '../../apis/courses/videosCourses';
 import { videoService } from '../../apis/mux/videoApi';
 import { formatDuration } from '../../utils/courses/videoUtils';
-import MuxVideoPlayer from '../courses/MuxVideoPlayer';
+import MuxVideoPlayer from '../videoCourses/MuxVideoPlayer';
 
 // Utility function to detect Arabic text
 const hasArabic = (text) => {

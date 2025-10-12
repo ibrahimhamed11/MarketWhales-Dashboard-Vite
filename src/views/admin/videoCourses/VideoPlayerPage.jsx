@@ -12,9 +12,9 @@ import {
 import {
   ArrowBack as ArrowBackIcon
 } from '@mui/icons-material';
-import { adminVideoAPI } from '../../apis/courses/videosCourses';
-import MuxVideoPlayer from '../../components/videoCourses/MuxVideoPlayer';
-import muiTheme from '../../theme/muiTheme';
+import { adminVideoAPI } from '../../../apis/courses/videosCourses';
+import MuxVideoPlayer from '../../../components/videoCourses/MuxVideoPlayer';
+import muiTheme from '../../../theme/muiTheme';
 
 const VideoPlayerPage = () => {
   const history = useHistory();
@@ -182,12 +182,11 @@ const VideoPlayerPage = () => {
             width: '100%',
             maxWidth: '1200px',
             backgroundColor: '#000',
-            borderRadius: 3,
+            borderRadius: 2,
             overflow: 'hidden',
-            boxShadow: '0 12px 40px rgba(0,0,0,0.15)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
             aspectRatio: '16/9',
-            mx: 'auto',
-            border: '1px solid rgba(255,255,255,0.1)'
+            mx: 'auto'
           }}
         >
           <MuxVideoPlayer 
@@ -209,11 +208,10 @@ const VideoPlayerPage = () => {
               width: '100%',
               maxWidth: '1200px',
               backgroundColor: '#fff',
-              borderRadius: 3,
-              padding: { xs: 3, md: 4 },
-              boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-              mx: 'auto',
-              border: '1px solid rgba(0,0,0,0.05)'
+              borderRadius: 2,
+              padding: 3,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              mx: 'auto'
             }}
           >
             <Typography

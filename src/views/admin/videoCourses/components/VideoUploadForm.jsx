@@ -84,16 +84,16 @@ const VideoUploadForm = () => {
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
+    
+    // Clear error when user starts typing
+    if (error) {
+      setError('');
+    }
   };
 
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
-    if (!formData.title) {
-      setError('Please enter a video title first');
-      return;
-    }
 
     const validation = validateVideoFile(file);
     if (!validation.isValid) {
@@ -102,12 +102,7 @@ const VideoUploadForm = () => {
     }
 
     setSelectedFile(file);
-    setError('');
-    
-    // Auto-start upload if title is provided
-    if (formData.title.trim()) {
-      handleUpload();
-    }
+    setError(''); // Clear any previous errors
   };
 
   const handleFileUpload = async (event) => {
@@ -115,8 +110,14 @@ const VideoUploadForm = () => {
   };
 
   const handleUpload = async () => {
-    if (!selectedFile || !formData.title.trim()) {
-      setError('Please provide a file and title');
+    // Validate all required fields
+    const errors = [];
+    if (!formData.title.trim()) errors.push('Video title is required');
+    if (!formData.description.trim()) errors.push('Description is required');
+    if (!selectedFile) errors.push('Video file is required');
+    
+    if (errors.length > 0) {
+      setError(errors.join(', '));
       return;
     }
 
@@ -326,7 +327,7 @@ const VideoUploadForm = () => {
               />
             </FormControl>
 
-            <FormControl>
+            <FormControl isRequired>
               <FormLabel color={textColor}>Display Order</FormLabel>
               <Input
                 type="number"
@@ -338,7 +339,7 @@ const VideoUploadForm = () => {
               />
             </FormControl>
 
-            <FormControl>
+            <FormControl isRequired>
               <FormLabel color={textColor}>Category</FormLabel>
               <Select
                 name="category"
@@ -354,7 +355,7 @@ const VideoUploadForm = () => {
               </Select>
             </FormControl>
 
-            <FormControl>
+            <FormControl isRequired>
               <FormLabel color={textColor}>Difficulty Level</FormLabel>
               <Select
                 name="difficulty"
@@ -369,7 +370,7 @@ const VideoUploadForm = () => {
             </FormControl>
           </SimpleGrid>
 
-          <FormControl>
+          <FormControl isRequired>
             <FormLabel color={textColor}>Description</FormLabel>
             <Textarea
               name="description"
@@ -436,7 +437,7 @@ const VideoUploadForm = () => {
               isLoading={uploading}
               loadingText="Uploading..."
               leftIcon={<Icon as={MdUpload} />}
-              disabled={!selectedFile || !formData.title.trim()}
+              disabled={uploading}
             >
               Upload Video
             </Button>
