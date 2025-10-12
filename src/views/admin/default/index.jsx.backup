@@ -1,0 +1,220 @@
+import {
+  Avatar,
+  Box,
+  Flex,
+  Icon,
+  SimpleGrid,
+  Spinner,
+  Text,
+  useColorModeValue,
+} from "@chakra-ui/react";
+import { useEffect, useState } from "react";
+import { getAllUsers, allOrders, getAllcourses, getAllsignals } from "utils/Dashboard/dashboard";
+import { Registrationstats } from "utils/Dashboard/dashboard";
+import MiniStatistics from "components/card/MiniStatistics";
+import IconBox from "components/icons/IconBox";
+import React from "react";
+import { MdPeople, MdShoppingCart, MdClass, MdFileCopy } from "react-icons/md";
+import ColumnChart from "components/charts/BarChart";
+import PieChart from "components/charts/PieChart";
+import WorldMap from "../../../components/WorldMap";
+import {  ThemeProvider ,createTheme} from '@mui/material/styles';
+
+export default function UserReports() {
+  const [users, setUsers] = useState([]);
+  const [orders, setOrders] = useState(0);
+  const [courses, setCourses] = useState(0);
+  const [signals, setSignals] = useState(0);
+  const [registrationStats, setRegistrationStats] = useState(null);
+  const [loading, setLoading] = useState(true); // State to manage loading status
+  const brandColor = useColorModeValue("brand.500", "white");
+  const boxBg = useColorModeValue("secondaryGray.300", "whiteAlpha.100");
+
+  const theme = createTheme({
+    palette: {
+     
+    },
+  });
+
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true); // Set loading to true when fetching starts
+      try {
+        // Fetch all required data
+        const fetchedUsers = await getAllUsers();
+        setUsers(fetchedUsers.data);
+
+        const fetchedOrders = await allOrders();
+        setOrders(fetchedOrders.length);
+
+        const fetchedCourses = await getAllcourses();
+        setCourses(fetchedCourses.length);
+
+        const fetchedSignals = await getAllsignals();
+        setSignals(fetchedSignals.signals.length);
+
+        const fetchedRegistrationStats = await Registrationstats();
+        setRegistrationStats(fetchedRegistrationStats);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false); // Set loading to false when fetching completes
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Calculate user roles distribution dynamically
+  const roleDistribution = users.reduce((acc, user) => {
+    const role = user.role; // Assuming each user has a "role" field
+    acc[role] = (acc[role] || 0) + 1;
+    return acc;
+  }, {});
+
+  
+  // Prepare pie chart data and options
+  const pieChartData = Object.values(roleDistribution); // Role counts
+  const pieChartOptions = {
+    labels: Object.keys(roleDistribution), // Role names
+    colors: ["#4318FF", "#25BEFFFF", "#D1132FFF", "#08E89DFF", "#8461F8FF", "#8461F8FF"], // Different colors for each segment
+    states: {
+      hover: {
+        filter: {
+          type: "none",
+        },
+      },
+    },
+    legend: {
+      show: true,
+    },
+    dataLabels: {
+      enabled: true,
+    },
+    fill: {
+      colors: ["#4318FF", "#25BEFFFF", "#D1132FFF", "#08E89DFF", "#8461F8FF", "#8461F8FF"],
+    },
+    tooltip: {
+      enabled: true,
+      theme: "dark",
+    },
+  };
+
+  const columnChartData = registrationStats
+    ? [
+        {
+          name: "User Growth",
+          data: registrationStats.userCounts,
+        },
+      ]
+    : [];
+
+  const columnChartOptions = {
+    chart: {
+      id: "user-growth-chart",
+      toolbar: {
+        show: false,
+      },
+    },
+    xaxis: {
+      categories: registrationStats ? registrationStats.months : [],
+    },
+    colors: ["#FF4560"],
+  };
+
+  return (
+    <Box pt={{ base: "130px", md: "80px", xl: "80px" }}>
+      {loading ? ( // Show loading spinner while loading
+        <Flex justifyContent="center" alignItems="center" height="100vh">
+          <Spinner size="xl" />
+        </Flex>
+      ) : (
+        <>
+          <SimpleGrid
+            columns={{ base: 1, md: 2, lg: 3, "2xl": 4 }}
+            gap="20px"
+            mb="20px"
+            marginTop="60px"
+          >
+            {/* Dynamic Cards */}
+            <MiniStatistics
+              startContent={
+                <IconBox
+                  w="56px"
+                  h="56px"
+                  bg={boxBg}
+                  icon={<Icon w="32px" h="32px" as={MdPeople} color={brandColor} />}
+                />
+              }
+              name="Total Users"
+              value={users.length}
+            />
+            <MiniStatistics
+              startContent={
+                <IconBox
+                  w="56px"
+                  h="56px"
+                  bg={boxBg}
+                  icon={<Icon w="32px" h="32px" as={MdShoppingCart} color={brandColor} />}
+                />
+              }
+              name="Total Orders"
+              value={orders}
+            />
+            <MiniStatistics
+              startContent={
+                <IconBox
+                  w="56px"
+                  h="56px"
+                  bg={boxBg}
+                  icon={<Icon w="32px" h="32px" as={MdClass} color={brandColor} />}
+                />
+              }
+              name="Number of Courses"
+              value={courses}
+            />
+            <MiniStatistics
+              startContent={
+                <IconBox
+                  w="56px"
+                  h="56px"
+                  bg={boxBg}
+                  icon={<Icon w="32px" h="32px" as={MdFileCopy} color={brandColor} />}
+                />
+              }
+              name="Total Signals"
+              value={signals}
+            />
+          </SimpleGrid>
+
+
+          <SimpleGrid columns={{ base: 1, md: 2 }} gap="20px" mb="20px">
+            <Box p={4} borderWidth={1} borderRadius="lg" boxShadow="md">
+              <Text fontSize="lg" mb={4}>User Roles Distribution</Text>
+              <PieChart chartData={pieChartData} chartOptions={pieChartOptions} />
+            </Box>
+
+            <Box p={4} borderWidth={1} borderRadius="lg" boxShadow="md">
+              <Text fontSize="lg" mb={4}>User Growth Over Months</Text>
+              {registrationStats ? (
+                <ColumnChart chartData={columnChartData} chartOptions={columnChartOptions} />
+              ) : (
+                <Text>Loading user growth data...</Text>
+              )}
+            </Box>
+          </SimpleGrid>
+
+          <ThemeProvider theme={theme}>
+
+<WorldMap userData={users} />
+
+</ThemeProvider>
+
+        </>
+      )}
+    </Box>
+
+
+  );
+}

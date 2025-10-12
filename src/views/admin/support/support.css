@@ -1,0 +1,6 @@
+/* Import Droid Arabic font using @font-face */
+@font-face {
+    font-family: 'DroidArabic';
+    src: url('../../../assets/fonts//Droid.ttf') format('truetype');
+  }
+  

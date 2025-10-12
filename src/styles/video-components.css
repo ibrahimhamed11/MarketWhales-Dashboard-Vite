@@ -1,0 +1,514 @@
+/* Video Upload Styles */
+.video-upload-container {
+  background: #f8f9fa;
+  padding: 24px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #333;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.form-group input:disabled,
+.form-group textarea:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.upload-progress {
+  margin-top: 16px;
+  padding: 16px;
+  background: #e3f2fd;
+  border-radius: 4px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #2196f3, #1976d2);
+  transition: width 0.3s ease;
+}
+
+.upload-status {
+  margin: 0 0 4px 0;
+  color: #1976d2;
+  font-weight: 500;
+}
+
+.upload-percentage {
+  margin: 0;
+  text-align: right;
+  font-weight: 600;
+  color: #1976d2;
+}
+
+/* Video List Styles */
+.video-list {
+  margin-bottom: 24px;
+}
+
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.video-card {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease;
+}
+
+.video-card:hover {
+  transform: translateY(-2px);
+}
+
+.video-thumbnail {
+  width: 100%;
+  height: 180px;
+  background: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.video-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.no-thumbnail {
+  font-size: 48px;
+  color: #ccc;
+}
+
+.video-details {
+  padding: 16px;
+}
+
+.video-details h4 {
+  margin: 0 0 8px 0;
+  color: #333;
+  font-size: 16px;
+}
+
+.video-description {
+  margin: 0 0 12px 0;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.video-meta {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.duration,
+.status,
+.provider {
+  padding: 4px 8px;
+  font-size: 12px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.duration {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.status {
+  text-transform: capitalize;
+}
+
+.status.ready {
+  background: #e8f5e8;
+  color: #2e7d32;
+}
+
+.status.processing {
+  background: #fff3e0;
+  color: #f57c00;
+}
+
+.status.uploading {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.status.errored {
+  background: #ffebee;
+  color: #d32f2f;
+}
+
+.provider {
+  background: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.video-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-danger {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-primary {
+  background: #2196f3;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #1976d2;
+}
+
+.btn-secondary {
+  background: #757575;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #616161;
+}
+
+.btn-danger {
+  background: #f44336;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #d32f2f;
+}
+
+/* Video Player Styles */
+.video-player-container {
+  margin-bottom: 24px;
+}
+
+.video-info {
+  margin-bottom: 16px;
+}
+
+.video-info h3 {
+  margin: 0 0 8px 0;
+  color: #333;
+}
+
+.video-description {
+  margin: 0;
+  color: #666;
+  line-height: 1.5;
+}
+
+.video-player-loading,
+.video-player-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #e0e0e0;
+  border-top: 3px solid #2196f3;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Mux Status Styles */
+.mux-status {
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.status-card {
+  background: #f8f9fa;
+  padding: 16px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.status-card h4 {
+  margin: 0 0 8px 0;
+  color: #333;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.status-card p {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #2196f3;
+}
+
+.status.operational {
+  color: #4caf50;
+}
+
+.configuration ul,
+.status-breakdown ul {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0 0;
+}
+
+.configuration li,
+.status-breakdown li {
+  padding: 4px 0;
+  color: #666;
+}
+
+/* Mux Player Styles */
+mux-player {
+  --controls: auto;
+  --media-accent-color: #2196f3;
+  --media-secondary-color: rgba(33, 150, 243, 0.7);
+  --controls-backdrop-color: rgba(0, 0, 0, 0.7);
+}
+
+mux-player::part(top-chrome) {
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0));
+}
+
+mux-player::part(bottom-chrome) {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0));
+}
+
+/* Course layout styles */
+.course-content {
+  display: flex;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.video-sidebar {
+  flex: 0 0 350px;
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  height: fit-content;
+}
+
+.video-main {
+  flex: 1;
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+}
+
+.no-video-selected {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: #666;
+}
+
+.progress-info {
+  margin-top: 16px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .course-content {
+    flex-direction: column;
+  }
+  
+  .video-sidebar {
+    flex: none;
+    order: 2;
+  }
+  
+  .video-main {
+    order: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .video-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .status-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .video-actions {
+    justify-content: center;
+  }
+  
+  .video-sidebar {
+    padding: 12px;
+  }
+  
+  .video-main {
+    padding: 16px;
+  }
+}
+
+/* Security and error states */
+.security-warning {
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid #ffc107;
+  color: #856404;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+.error-state {
+  background: #ffebee;
+  border: 1px solid #f44336;
+  color: #c62828;
+  padding: 16px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.loading-state {
+  background: #e3f2fd;
+  border: 1px solid #2196f3;
+  color: #1565c0;
+  padding: 16px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+/* Admin dashboard specific styles */
+.admin-videos {
+  padding: 24px;
+}
+
+.admin-tabs {
+  margin-bottom: 24px;
+}
+
+.admin-content {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+.upload-section,
+.videos-section,
+.preview-section,
+.status-section {
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Focus and accessibility improvements */
+button:focus,
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 2px solid #2196f3;
+  outline-offset: 2px;
+}
+
+.video-card:focus-within {
+  outline: 2px solid #2196f3;
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .video-card {
+    border: 2px solid #000;
+  }
+  
+  .btn-primary {
+    background: #000;
+    color: #fff;
+  }
+  
+  .status.ready {
+    background: #000;
+    color: #fff;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .video-card,
+  .progress-fill,
+  .spinner {
+    transition: none;
+    animation: none;
+  }
+}

@@ -1,0 +1,8 @@
+/* PieChart.css */
+
+.apexcharts-legend-text {
+    font-size: 24px !important; /* Increase the font size */
+    font-weight: bold !important; /* Set font weight to bold */
+    margin: 10px 0; /* Add margin for better spacing */
+  }
+  
