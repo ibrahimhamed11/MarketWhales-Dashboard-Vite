@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
-import { videoService } from '../apis/mux/videoApi';
+import { adminVideoAPI, userVideoAPI, handleApiError } from '../apis/videoCoursesService';
 
-const useVideoStream = (videoId) => {
+const useVideoStream = (videoId, isAdminMode = false) => {
   const [videoData, setVideoData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -22,37 +22,58 @@ const useVideoStream = (videoId) => {
       setLoading(true);
       setError(null);
 
-      // TODO: Replace with actual video service call
-      const mockVideoData = {
+      let videoResponse;
+      let streamResponse;
+
+      // Get video details
+      if (isAdminMode) {
+        videoResponse = await adminVideoAPI.getVideoDetails(videoId);
+        // Get admin stream URL
+        streamResponse = await adminVideoAPI.getVideoStream(videoId);
+      } else {
+        videoResponse = await userVideoAPI.getVideoDetails(videoId);
+        // Generate device fingerprint for user stream
+        const deviceFingerprint = `${navigator.userAgent}-${Date.now()}`;
+        streamResponse = await userVideoAPI.getVideoStreamUrl(videoId, deviceFingerprint);
+      }
+
+      const videoDetails = videoResponse.data || videoResponse;
+      const streamData = streamResponse.data || streamResponse;
+
+      const processedVideoData = {
         id: videoId,
-        title: `Video ${videoId}`,
-        description: 'Sample video description',
-        streamUrl: `https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4`,
-        thumbnailUrl: null,
-        duration: 630, // seconds
-        status: 'ready',
-        quality: ['720p', '480p', '360p'],
-        captions: [],
+        title: videoDetails.title || `Video ${videoId}`,
+        description: videoDetails.description || '',
+        streamUrl: streamData.streamUrl || streamData.url,
+        thumbnailUrl: videoDetails.thumbnailUrl || streamData.thumbnailUrl,
+        duration: videoDetails.duration || 0,
+        status: videoDetails.status || streamData.status || 'ready',
+        quality: streamData.quality || ['720p', '480p', '360p'],
+        captions: videoDetails.captions || [],
         metadata: {
-          width: 1280,
-          height: 720,
-          fps: 30,
-          codec: 'h264'
-        }
+          width: videoDetails.width || streamData.width || 1280,
+          height: videoDetails.height || streamData.height || 720,
+          fps: videoDetails.fps || 30,
+          codec: videoDetails.codec || 'h264'
+        },
+        playbackId: videoDetails.playbackId || streamData.playbackId,
+        order: videoDetails.order,
+        courseId: videoDetails.courseId,
       };
 
-      setVideoData(mockVideoData);
+      setVideoData(processedVideoData);
       setPlaybackState(prev => ({
         ...prev,
-        duration: mockVideoData.duration
+        duration: processedVideoData.duration
       }));
     } catch (err) {
       console.error('Error fetching video data:', err);
-      setError(err.message || 'Failed to load video');
+      const errorMessage = handleApiError(err, 'Failed to load video');
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
-  }, [videoId]);
+  }, [videoId, isAdminMode]);
 
   // Playback controls
   const play = useCallback(() => {
@@ -91,30 +112,37 @@ const useVideoStream = (videoId) => {
   // Video analytics tracking
   const trackView = useCallback(async () => {
     try {
-      // TODO: Track video view
-      console.log('Tracking video view for:', videoId);
+      if (isAdminMode) {
+        // Admin analytics tracking could be different
+        console.log('Admin tracking video view for:', videoId);
+      } else {
+        // Track user video view
+        console.log('Tracking video view for:', videoId);
+      }
     } catch (err) {
       console.error('Error tracking video view:', err);
     }
-  }, [videoId]);
+  }, [videoId, isAdminMode]);
 
-  const trackProgress = useCallback(async (progress) => {
+  const trackProgress = useCallback(async (watchTime, completed = false) => {
     try {
-      // TODO: Track video progress
-      console.log('Tracking video progress:', progress, 'for video:', videoId);
+      // Progress tracking not implemented yet - just log for now
+      console.log(`Video progress: ${watchTime}s, completed: ${completed}`);
+      // TODO: Implement progress tracking when backend endpoints are available
     } catch (err) {
       console.error('Error tracking video progress:', err);
     }
-  }, [videoId]);
+  }, [videoId, isAdminMode]);
 
   const trackCompletion = useCallback(async () => {
     try {
-      // TODO: Track video completion
-      console.log('Tracking video completion for:', videoId);
+      const watchTime = playbackState.duration;
+      await trackProgress(watchTime, true);
+      console.log('Video completion tracked for:', videoId);
     } catch (err) {
       console.error('Error tracking video completion:', err);
     }
-  }, [videoId]);
+  }, [videoId, playbackState.duration, trackProgress]);
 
   // Format time helper
   const formatTime = useCallback((seconds) => {

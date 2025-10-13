@@ -24,7 +24,8 @@ import {
   ThemeProvider,
   Tooltip,
   Divider,
-  Container
+  Container,
+  Snackbar
 } from '@mui/material';
 
 // Icons
@@ -37,21 +38,22 @@ import {
   Visibility as VisibilityIcon,
   VisibilityOff as VisibilityOffIcon,
   Storage as StorageIcon,
-  BarChart as BarChartIcon,
   ArrowBack as ArrowBackIcon,
   AccessTime as AccessTimeIcon,
   PlayCircleFilled as PlayCircleFilledIcon,
   GridView as GridViewIcon,
-  ViewList as ViewListIcon
+  ViewList as ViewListIcon,
+  BarChart as BarChartIcon,
+  Edit as EditIcon,
+  Save as SaveIcon,
+  Cancel as CancelIcon
 } from '@mui/icons-material';
 
 import useCourseVideos from '../../../hooks/useCourseVideos';
 import { formatDuration, formatFileSize } from '../../../utils/courses/videoUtils';
-import VideoAnalyticsModal from '../../../components/modal/VideoAnalyticsModal';
 import VideoPlayerModal from '../../../components/modal/VideoPlayerModal';
 import muiTheme from '../../../theme/muiTheme';
-
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+import { API_URL } from '../../../apis/config';
 
 // Utility function to detect Arabic text
 const hasArabic = (text) => {
@@ -76,10 +78,14 @@ const CourseVideosManagement = () => {
   const [videoPlayerOpen, setVideoPlayerOpen] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState(null);
 
-  // Analytics modal state
-  const [analyticsModalOpen, setAnalyticsModalOpen] = useState(false);
-  const [selectedVideoAnalytics, setSelectedVideoAnalytics] = useState(null);
-  const [selectedVideoTitle, setSelectedVideoTitle] = useState('');
+  // Editing state
+  const [editingVideo, setEditingVideo] = useState(null);
+  const [editedTitle, setEditedTitle] = useState('');
+  const [editedDescription, setEditedDescription] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
 
   const {
     course,
@@ -100,6 +106,7 @@ const CourseVideosManagement = () => {
     refetchVideos,
     toggleVideoStatus,
     deleteVideo,
+    updateVideo,
   } = useCourseVideos(courseId);
 
   const handlePlayVideo = (video) => {
@@ -122,6 +129,108 @@ const CourseVideosManagement = () => {
 
   const handleToggleVideoStatus = async (videoId, isActive) => {
     await toggleVideoStatus(videoId, isActive);
+  };
+
+  const handleDeleteEmptyVideos = async () => {
+    const emptyVideos = videos.filter(video => 
+      !video.fileSize || video.fileSize === 0 || video.fileSize === '0'
+    );
+    
+    if (emptyVideos.length === 0) {
+      alert('No videos with 0 bytes found.');
+      return;
+    }
+    
+    const confirmed = window.confirm(
+      `Are you sure you want to delete ${emptyVideos.length} video(s) with 0 bytes? This action cannot be undone.`
+    );
+    
+    if (!confirmed) return;
+    
+    try {
+      for (const video of emptyVideos) {
+        await deleteVideo(video._id);
+      }
+      alert(`Successfully deleted ${emptyVideos.length} empty video(s).`);
+    } catch (error) {
+      console.error('Error deleting empty videos:', error);
+      alert('Error occurred while deleting videos. Please try again.');
+    }
+  };
+
+  const handleDeleteZeroViewVideos = async () => {
+    const zeroViewVideos = videos.filter(video => 
+      !video.viewCount || video.viewCount === 0
+    );
+    
+    if (zeroViewVideos.length === 0) {
+      alert('No videos with 0 views found.');
+      return;
+    }
+    
+    const confirmed = window.confirm(
+      `Are you sure you want to delete ${zeroViewVideos.length} video(s) with 0 views? This action cannot be undone.`
+    );
+    
+    if (!confirmed) return;
+    
+    try {
+      for (const video of zeroViewVideos) {
+        await deleteVideo(video._id);
+      }
+      alert(`Successfully deleted ${zeroViewVideos.length} video(s) with 0 views.`);
+    } catch (error) {
+      console.error('Error deleting zero-view videos:', error);
+      alert('Error occurred while deleting videos. Please try again.');
+    }
+  };
+
+  // Edit video functionality
+  const handleEditVideo = (video) => {
+    setEditingVideo(video._id);
+    setEditedTitle(video.title || '');
+    setEditedDescription(video.description || '');
+  };
+
+  const handleCancelEdit = () => {
+    setEditingVideo(null);
+    setEditedTitle('');
+    setEditedDescription('');
+  };
+
+  const handleSaveEdit = async (videoId) => {
+    if (!editedTitle.trim()) {
+      setSnackbarMessage('Title cannot be empty');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+      return;
+    }
+
+    setSaving(true);
+    try {
+      await updateVideo(videoId, {
+        title: editedTitle.trim(),
+        description: editedDescription.trim()
+      });
+      
+      setEditingVideo(null);
+      setEditedTitle('');
+      setEditedDescription('');
+      setSnackbarMessage('Video updated successfully');
+      setSnackbarSeverity('success');
+      setSnackbarOpen(true);
+    } catch (error) {
+      console.error('Error updating video:', error);
+      setSnackbarMessage('Failed to update video. Please try again.');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
   };
 
   // Filtering handled by hook
@@ -250,7 +359,7 @@ const CourseVideosManagement = () => {
                   }}>
                     {course.image ? (
                       <img 
-                        src={course.image.startsWith('http') ? course.image : `${API_URL}${course.image}`} 
+                        src={course.image.startsWith('http') ? course.image : `${API_URL}/${course.image}`} 
                         alt={course.name}
                         style={{
                           width: '100%',
@@ -378,17 +487,7 @@ const CourseVideosManagement = () => {
               </Select>
             </FormControl>
 
-            <Tooltip title="Toggle view mode">
-              <IconButton 
-                onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
-                sx={{ 
-                  ml: { xs: 0, sm: 'auto' },
-                  alignSelf: { xs: 'center', sm: 'auto' }
-                }}
-              >
-                {viewMode === 'grid' ? <ViewListIcon /> : <GridViewIcon />}
-              </IconButton>
-            </Tooltip>
+
           </Box>
         )}
 
@@ -552,45 +651,105 @@ const CourseVideosManagement = () => {
                   </Box>
 
                   <CardContent>
-                    <Typography variant="body1" sx={{ 
-                      mb: 1, 
-                      fontWeight: 600, 
-                      fontFamily: getFontFamily(video.title),
-                      wordWrap: 'break-word',
-                      overflow: 'visible'
-                    }}>
-                      {video.title}
-                    </Typography>
-                    
-                    <Typography 
-                      variant="body2" 
-                      color="text.secondary" 
-                      sx={{ 
-                        mb: 2,
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden'
-                      }}
-                    >
-                      {video.description || 'No description provided'}
-                    </Typography>
-                    
-                    <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap' }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <StorageIcon fontSize="small" color="action" />
-                        <Typography variant="caption">
-                          {formatFileSize(video.fileSize)}
+                    {editingVideo === video._id ? (
+                      // Edit mode
+                      <Box>
+                        <TextField
+                          fullWidth
+                          size="small"
+                          label="Video Title"
+                          value={editedTitle}
+                          onChange={(e) => setEditedTitle(e.target.value)}
+                          sx={{ 
+                            mb: 2,
+                            '& .MuiOutlinedInput-root': {
+                              fontFamily: getFontFamily(editedTitle),
+                            }
+                          }}
+                          inputProps={{ maxLength: 100 }}
+                          helperText={`${editedTitle.length}/100 characters`}
+                        />
+                        <TextField
+                          fullWidth
+                          size="small"
+                          label="Video Description"
+                          multiline
+                          rows={3}
+                          value={editedDescription}
+                          onChange={(e) => setEditedDescription(e.target.value)}
+                          sx={{ 
+                            mb: 2,
+                            '& .MuiOutlinedInput-root': {
+                              fontFamily: getFontFamily(editedDescription),
+                            }
+                          }}
+                          inputProps={{ maxLength: 500 }}
+                          helperText={`${editedDescription.length}/500 characters`}
+                        />
+                        <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+                          <Button
+                            size="small"
+                            onClick={handleCancelEdit}
+                            startIcon={<CancelIcon />}
+                            sx={{ textTransform: 'capitalize' }}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            size="small"
+                            variant="contained"
+                            onClick={() => handleSaveEdit(video._id)}
+                            startIcon={saving ? <CircularProgress size={14} /> : <SaveIcon />}
+                            disabled={saving || !editedTitle.trim()}
+                            sx={{ textTransform: 'capitalize' }}
+                          >
+                            Save
+                          </Button>
+                        </Box>
+                      </Box>
+                    ) : (
+                      // View mode
+                      <Box>
+                        <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 1 }}>
+                          <Typography variant="body1" sx={{ 
+                            fontWeight: 600, 
+                            fontFamily: getFontFamily(video.title),
+                            wordWrap: 'break-word',
+                            overflow: 'visible',
+                            flex: 1,
+                            mr: 1
+                          }}>
+                            {video.title}
+                          </Typography>
+                          <IconButton
+                            size="small"
+                            onClick={() => handleEditVideo(video)}
+                            sx={{ 
+                              p: 0.5,
+                              '&:hover': { bgcolor: 'action.hover' }
+                            }}
+                          >
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                        </Box>
+                        
+                        <Typography 
+                          variant="body2" 
+                          color="text.secondary" 
+                          sx={{ 
+                            mb: 2,
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                            fontFamily: getFontFamily(video.description)
+                          }}
+                        >
+                          {video.description || 'No description provided'}
                         </Typography>
                       </Box>
-                      
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <VisibilityIcon fontSize="small" color="action" />
-                        <Typography variant="caption">
-                          {video.viewCount || 0} views
-                        </Typography>
-                      </Box>
-                    </Box>
+                    )}
+
                   </CardContent>
                   
                   <CardActions sx={{ 
@@ -653,31 +812,7 @@ const CourseVideosManagement = () => {
                       {video.isActive ? 'Hide' : 'Show'}
                     </Button>
                     
-                    <Button
-                      onClick={() => {
-                        // Defer fetch until modal is opened; keep existing behavior
-                        import('../../../apis/courses/videosCourses').then(({ adminVideoAPI }) => {
-                          adminVideoAPI.getVideoAnalytics(video._id).then((analytics) => {
-                            setSelectedVideoAnalytics(analytics);
-                            setSelectedVideoTitle(video.title);
-                            setAnalyticsModalOpen(true);
-                          });
-                        });
-                      }}
-                      variant="outlined"
-                      size="small"
-                      startIcon={<BarChartIcon />}
-                      sx={{ 
-                        minWidth: { xs: '70px', sm: '75px' },
-                        fontSize: '0.75rem',
-                        px: 1,
-                        py: 0.5,
-                        height: '28px',
-                        textTransform: 'capitalize'
-                      }}
-                    >
-                      Stats
-                    </Button>
+         
                     
                     <Button
                       onClick={() => handleVideoDelete(video._id)}
@@ -714,13 +849,21 @@ const CourseVideosManagement = () => {
           courseTitle={course?.name}
         />
 
-        {/* Analytics Modal */}
-        <VideoAnalyticsModal
-          open={analyticsModalOpen}
-          onClose={() => setAnalyticsModalOpen(false)}
-          analytics={selectedVideoAnalytics}
-          videoTitle={selectedVideoTitle}
-        />
+        {/* Snackbar for notifications */}
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={4000}
+          onClose={handleSnackbarClose}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        >
+          <Alert 
+            onClose={handleSnackbarClose} 
+            severity={snackbarSeverity}
+            sx={{ width: '100%' }}
+          >
+            {snackbarMessage}
+          </Alert>
+        </Snackbar>
       </Container>
     </ThemeProvider>
   );

@@ -83,11 +83,36 @@ const MuxPlayerComponent = ({
       setLoading(true);
       setError(null);
       
-      const data = await videoService.getAdminVideoStream(videoId);
-      setStreamData(data);
+      // Generate device fingerprint for user video access
+      const deviceFingerprint = Math.random().toString(36).substring(2, 15) + 
+                               Math.random().toString(36).substring(2, 15);
+      
+      // Try user video stream first (for user-facing video access)
+      let data;
+      try {
+        data = await videoService.getVideoStreamUrl(videoId, deviceFingerprint);
+      } catch (userError) {
+        console.warn('User video stream failed, trying admin stream:', userError);
+        // Fallback to admin stream
+        data = await videoService.getAdminVideoStream(videoId);
+      }
+      
+      // Validate stream URL before setting
+      if (data && data.streamUrl) {
+        // Check if URL is valid
+        try {
+          new URL(data.streamUrl);
+          setStreamData(data);
+        } catch (urlError) {
+          console.error('Invalid stream URL:', data.streamUrl, urlError);
+          throw new Error('Invalid video stream URL received from server');
+        }
+      } else {
+        throw new Error('No valid stream URL received from server');
+      }
     } catch (err) {
       console.error('Error loading video stream:', err);
-      setError('Failed to load video');
+      setError(err.message || 'Failed to load video. Please try again later.');
       onError?.(err);
     } finally {
       setLoading(false);
@@ -123,17 +148,23 @@ const MuxPlayerComponent = ({
         </div>
       )}
       
-      {streamData && !loading && !error && (
+      {streamData && streamData.streamUrl && !loading && !error && (
         <video
           style={videoElementStyle}
           controls
           autoPlay={autoPlay}
           onTimeUpdate={handleProgress}
           onEnded={handleEnded}
+          onError={(e) => {
+            console.error('Video playback error:', e);
+            setError('Video playback failed. Please check your internet connection.');
+          }}
           playsInline
         >
           <source src={streamData.streamUrl} type="application/x-mpegURL" />
-          <source src={streamData.streamUrl?.replace('.m3u8', '.mp4')} type="video/mp4" />
+          {streamData.streamUrl.includes('.m3u8') && (
+            <source src={streamData.streamUrl.replace('.m3u8', '.mp4')} type="video/mp4" />
+          )}
           Your browser does not support this video format.
         </video>
       )}

@@ -118,6 +118,11 @@ export default function useCourseVideos(courseId) {
     await fetchCourseVideos();
   }, [fetchCourseVideos]);
 
+  const updateVideo = useCallback(async (videoId, updateData) => {
+    await adminVideoAPI.updateVideo(videoId, updateData);
+    await fetchCourseVideos();
+  }, [fetchCourseVideos]);
+
   return {
     // data
     course,
@@ -141,5 +146,6 @@ export default function useCourseVideos(courseId) {
     refetchVideos: fetchCourseVideos,
     toggleVideoStatus,
     deleteVideo,
+    updateVideo,
   };
 }

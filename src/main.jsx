@@ -10,6 +10,7 @@ import {
 } from "react-router-dom";
 import AuthLayout from "./layouts/auth/index.jsx";
 import AdminLayout from "./layouts/admin/index.jsx";
+import UserLayout from "./layouts/user/index.jsx";
 import { ChakraProvider } from "@chakra-ui/react";
 import theme from "./theme/theme";
 import { ThemeEditorProvider } from "@hypertheme-editor/chakra-ui";
@@ -46,6 +47,7 @@ ReactDOM.render(
               render={(props) => <AuthLayout {...props} login={login} />}
             />
             <PrivateRoute path="/admin" component={AdminLayout} />
+            <PrivateRoute path="/user" component={UserLayout} />
 
             {/* Default redirect */}
             <Redirect from="/" to="/admin" />

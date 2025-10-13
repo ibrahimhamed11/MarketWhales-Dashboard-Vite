@@ -44,7 +44,8 @@ import {
   Group as GroupIcon,
   Add as AddIcon,
   Settings as SettingsIcon,
-  AttachMoney as AttachMoneyIcon
+  AttachMoney as AttachMoneyIcon,
+  Preview as PreviewIcon
 } from '@mui/icons-material';
 
 // React Icons for Chakra UI cards
@@ -52,8 +53,7 @@ import { MdClass, MdSchool, MdVideoLibrary, MdOndemandVideo } from "react-icons/
 
 import useCoursesManagement from '../../../hooks/useCoursesManagement';
 import muiTheme from '../../../theme/muiTheme';
-
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+import { API_URL } from '../../../apis/config';
 
 // Utility function to detect Arabic text
 const hasArabic = (text) => {
@@ -485,7 +485,8 @@ const CourseManagementDashboard = () => {
                         px: 2, 
                         pb: 2,
                         flexDirection: { xs: 'column', sm: 'row' },
-                        gap: { xs: 1, sm: 0 }
+                        gap: { xs: 1, sm: 0 },
+                        flexWrap: 'wrap'
                       }}>
                         <Button 
                           size="small" 
@@ -497,6 +498,7 @@ const CourseManagementDashboard = () => {
                           variant="outlined"
                           sx={{ 
                             mr: { xs: 0, sm: 1 },
+                            mb: { xs: 1, sm: 0 },
                             textTransform: 'none',
                             width: { xs: '100%', sm: 'auto' }
                           }}
@@ -512,11 +514,31 @@ const CourseManagementDashboard = () => {
                           }}
                           color="primary"
                           sx={{ 
+                            mr: { xs: 0, sm: 1 },
+                            mb: { xs: 1, sm: 0 },
                             textTransform: 'none',
                             width: { xs: '100%', sm: 'auto' }
                           }}
                         >
                           Upload video
+                        </Button>
+                        <Button 
+                          size="small" 
+                          startIcon={<PreviewIcon />}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Navigate to user course view
+                            history.push(`/user/course/${course._id}`);
+                          }}
+                          color="secondary"
+                          variant="text"
+                          title="Preview how this course appears to students"
+                          sx={{ 
+                            textTransform: 'none',
+                            width: { xs: '100%', sm: 'auto' }
+                          }}
+                        >
+                          View as User
                         </Button>
                       </CardActions>
                     </Card>

@@ -6,15 +6,12 @@ const VideoPlayer = ({ videoId, onProgress, onComplete }) => {
   const handleProgress = (currentTime, duration) => {
     const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
     
-    // Update progress every 10 seconds
-    if (Math.floor(currentTime) % 10 === 0) {
-      videoService.updateWatchProgress(videoId, Math.floor(currentTime), false);
-      onProgress?.(Math.floor(currentTime), Math.floor(duration), progress);
-    }
+    // Progress tracking disabled - just call the callback
+    onProgress?.(Math.floor(currentTime), Math.floor(duration), progress);
   };
 
   const handleComplete = (duration) => {
-    videoService.updateWatchProgress(videoId, Math.floor(duration), true);
+    // Progress tracking disabled - just call the callback
     onComplete?.(Math.floor(duration));
   };
 

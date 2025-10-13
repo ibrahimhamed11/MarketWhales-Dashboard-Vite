@@ -34,9 +34,7 @@ const VideoUploadForm = () => {
     title: '',
     description: '',
     order: 1,
-    isActive: true,
-    category: 'lecture',
-    difficulty: 'beginner'
+    isActive: true
   });
 
   const [selectedFile, setSelectedFile] = useState(null);
@@ -133,8 +131,6 @@ const VideoUploadForm = () => {
       uploadData.append('description', formData.description);
       uploadData.append('order', formData.order.toString());
       uploadData.append('isActive', formData.isActive.toString());
-      uploadData.append('category', formData.category);
-      uploadData.append('difficulty', formData.difficulty);
 
       const result = await adminVideoAPI.uploadVideo(
         courseId,
@@ -174,9 +170,7 @@ const VideoUploadForm = () => {
       title: '',
       description: '',
       order: 1,
-      isActive: true,
-      category: 'lecture',
-      difficulty: 'beginner'
+      isActive: true
     });
     setError('');
     setUploadComplete(false);
@@ -337,36 +331,6 @@ const VideoUploadForm = () => {
                 min="1"
                 disabled={uploading}
               />
-            </FormControl>
-
-            <FormControl isRequired>
-              <FormLabel color={textColor}>Category</FormLabel>
-              <Select
-                name="category"
-                value={formData.category}
-                onChange={handleInputChange}
-                disabled={uploading}
-              >
-                <option value="lecture">Lecture</option>
-                <option value="tutorial">Tutorial</option>
-                <option value="demo">Demonstration</option>
-                <option value="interview">Interview</option>
-                <option value="qna">Q&A Session</option>
-              </Select>
-            </FormControl>
-
-            <FormControl isRequired>
-              <FormLabel color={textColor}>Difficulty Level</FormLabel>
-              <Select
-                name="difficulty"
-                value={formData.difficulty}
-                onChange={handleInputChange}
-                disabled={uploading}
-              >
-                <option value="beginner">Beginner</option>
-                <option value="intermediate">Intermediate</option>
-                <option value="advanced">Advanced</option>
-              </Select>
             </FormControl>
           </SimpleGrid>
 

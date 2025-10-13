@@ -37,14 +37,30 @@ const VideoList = ({ courseId, isAdmin = false, onVideoSelect }) => {
   const loadVideos = async () => {
     try {
       setLoading(true);
+      setError('');
+      
       const videoList = isAdmin 
         ? await videoService.getCourseVideos(courseId)
         : await videoService.getUserCourseVideos(courseId);
       
-      setVideos(videoList);
-      setLoading(false);
+      // Ensure videoList is an array and filter out invalid entries
+      const validVideos = Array.isArray(videoList) ? videoList.filter(video => 
+        video && video._id && video.title
+      ) : [];
+      
+      setVideos(validVideos);
     } catch (err) {
-      setError('Failed to load videos');
+      console.error('Error loading videos:', err);
+      const errorMessage = err.response?.status === 401 
+        ? 'Authentication required. Please log in again.'
+        : err.response?.status === 403
+        ? 'Access denied. You may not have permission to view these videos.'
+        : err.response?.status === 404
+        ? 'Course not found or has no videos.'
+        : 'Failed to load videos. Please check your internet connection and try again.';
+      
+      setError(errorMessage);
+    } finally {
       setLoading(false);
     }
   };
@@ -149,10 +165,24 @@ const VideoList = ({ courseId, isAdmin = false, onVideoSelect }) => {
                 {video.thumbnailUrl ? (
                   <Image 
                     src={video.thumbnailUrl} 
-                    alt={video.title}
+                    alt={video.title || 'Video thumbnail'}
                     h="200px"
                     w="100%"
                     objectFit="cover"
+                    fallback={
+                      <Box 
+                        h="200px" 
+                        bg="gray.200" 
+                        display="flex" 
+                        alignItems="center" 
+                        justifyContent="center"
+                      >
+                        <Text fontSize="4xl">📹</Text>
+                      </Box>
+                    }
+                    onError={(e) => {
+                      console.warn('Thumbnail failed to load:', video.thumbnailUrl);
+                    }}
                   />
                 ) : (
                   <Box 
@@ -181,7 +211,7 @@ const VideoList = ({ courseId, isAdmin = false, onVideoSelect }) => {
               
               <Box p="20px">
                 <VStack align="start" spacing={3}>
-                  <Text fontWeight="bold" fontSize="lg">{video.title}</Text>
+                  <Text fontWeight="bold" fontSize="lg">{video.title || 'Untitled Video'}</Text>
                   
                   {video.description && (
                     <Text fontSize="sm" color="gray.600" noOfLines={2}>

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Box, IconButton, Button, Typography } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import PreviewIcon from "@mui/icons-material/Preview";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import {
   getAllcourses,
@@ -479,6 +480,16 @@ const CoursesTable = () => {
             onClick={() => handleEdit(row.original._id)}
           >
             <EditIcon />
+          </IconButton>
+          <IconButton
+            color="secondary"
+            onClick={() => {
+              // Open user course view in new tab
+              window.open(`/user/course/${row.original._id}`, '_blank');
+            }}
+            title="View as User"
+          >
+            <PreviewIcon />
           </IconButton>
         </>
       ),
