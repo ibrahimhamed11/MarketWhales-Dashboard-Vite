@@ -3,8 +3,42 @@
  * This file contains all API-related configurations and constants
  */
 
+// Environment detection
+const isDevelopment = import.meta.env.MODE === 'development';
+const isProduction = import.meta.env.MODE === 'production';
+
+// Backend URL configurations
+const BACKEND_URLS = {
+  development: 'http://localhost:4000', // Local backend
+  production: 'https://market-whales.onrender.com', // Production backend
+};
+
+// Get API URL based on environment or manual override
+export const getApiUrl = () => {
+  // Check for manual override first
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  
+  // Use environment-based URL
+  if (isDevelopment) {
+    return BACKEND_URLS.development;
+  }
+  
+  return BACKEND_URLS.production;
+};
+
 // Base API URL configuration
-export const API_URL = import.meta.env.VITE_API_URL || "https://market-whales.onrender.com";
+export const API_URL = getApiUrl();
+
+// Environment info for debugging
+export const ENV_INFO = {
+  mode: import.meta.env.MODE,
+  isDevelopment,
+  isProduction,
+  apiUrl: API_URL,
+  manualOverride: !!import.meta.env.VITE_API_URL,
+};
 
 // MUX configuration
 export const MUX_ENV_KEY = import.meta.env.VITE_MUX_ENV_KEY;
@@ -47,9 +81,19 @@ export const API_ENDPOINTS = {
     MUX_STATUS: '/admin/videos/system/mux-status',
   },
 
-  // User video endpoints (currently using admin endpoints)
+  // User video endpoints (matching backend routes EXACTLY)
   USER_VIDEOS: {
-    COURSE_VIDEOS: (courseId) => `/admin/videos/courses/${courseId}`, // Using admin endpoint for now
+    COURSES: '/courses', // Get all available courses for user
+    COURSE_VIDEOS: (courseId) => `/user/courses/${courseId}/videos`, // Matches backend: router.get("/courses/:courseId/videos")
+    VIDEO_STREAM: (videoId) => `/user/videos/${videoId}/stream`, // Matches backend: router.post("/videos/:videoId/stream")
+    VIDEO_STREAM_URL: (videoId) => `/user/videos/${videoId}/stream-url`, // Matches backend: router.post("/videos/:videoId/stream-url")
+    VIDEO_DETAILS: (videoId) => `/user/videos/${videoId}/details`, // Matches backend: router.get("/videos/:videoId/details")
+    VIDEO_PROGRESS: (videoId) => `/user/videos/${videoId}/progress`, // Matches backend: router.put/post("/videos/:videoId/progress")
+    COURSE_PROGRESS: (courseId) => `/user/courses/${courseId}/progress`, // Matches backend: router.get("/courses/:courseId/progress")
+    VIDEO_MANIFEST: (videoId) => `/user/videos/${videoId}/manifest`, // Matches backend: router.get("/videos/:videoId/manifest")
+    REFRESH_TOKEN: '/user/videos/refresh-token', // Matches backend: router.post("/videos/refresh-token")
+    VALIDATE_TOKEN: '/user/videos/validate-token', // Matches backend: router.post("/videos/validate-token")
+    VIDEO_PLAYLIST: (courseId) => `/user/courses/${courseId}/videos/playlist`, // Matches backend: router.get("/courses/:courseId/videos/playlist")
   },
 };
 
@@ -138,6 +182,7 @@ export const REQUEST_CONFIG = {
 
 export default {
   API_URL,
+  ENV_INFO,
   MUX_ENV_KEY,
   API_ENDPOINTS,
   DEFAULT_HEADERS,
@@ -147,4 +192,5 @@ export default {
   getAuthHeaders,
   getVideoAuthHeaders,
   REQUEST_CONFIG,
+  getApiUrl,
 };

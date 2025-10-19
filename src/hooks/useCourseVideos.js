@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { courseAPI, adminVideoAPI } from '../apis/courses/videosCourses';
+import { courseAPI, adminVideoAPI, userVideoAPI } from '../apis/courses/videosCourses';
 import { videoService } from '../apis/mux/videoApi';
 
-export default function useCourseVideos(courseId) {
+export default function useCourseVideos(courseId, isAdminMode = true) {
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -48,11 +48,17 @@ export default function useCourseVideos(courseId) {
     
     try {
       if (isMounted) setVideosLoading(true);
-      const data = await adminVideoAPI.getCourseVideos(courseId);
+      
+      // Use appropriate API based on mode
+      const data = isAdminMode 
+        ? await adminVideoAPI.getCourseVideos(courseId)
+        : await userVideoAPI.getCourseVideos(courseId);
+      
       const sorted = Array.isArray(data) ? data.sort((a, b) => a.order - b.order) : [];
       if (isMounted) setVideos(sorted);
     } catch (err) {
       // no-op; UI can show empty state
+      console.error('Error fetching course videos:', err);
     } finally {
       if (isMounted) setVideosLoading(false);
     }
@@ -60,7 +66,7 @@ export default function useCourseVideos(courseId) {
     return () => {
       isMounted = false;
     };
-  }, [courseId]);
+  }, [courseId, isAdminMode]);
 
   const fetchMuxStatus = useCallback(async () => {
     let isMounted = true;

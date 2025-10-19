@@ -3,7 +3,10 @@
  * This file tests which routes are actually available on the backend
  */
 
-const BASE_URL = 'https://market-whales.onrender.com';
+import { API_URL } from '../apis/config';
+
+// Use centralized BASE_URL from config
+const BASE_URL = API_URL;
 
 // Test routes to check what's available
 const testRoutes = [

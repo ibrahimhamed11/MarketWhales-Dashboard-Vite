@@ -85,14 +85,14 @@ export const adminVideoAPI = {
 // ========================
 
 export const userVideoAPI = {
-  // Get course videos (user view)
+  // Get course videos (user view) - ONLY USER API
   getCourseVideos: newUserVideoAPI.getCourseVideos,
 
-  // Get video details
+  // Get video details - ONLY USER API
   getVideoDetails: newUserVideoAPI.getVideoDetails,
 
-  // Get secure video stream URL
-  getSecureVideoStream: newUserVideoAPI.getVideoStreamUrl,
+  // Get secure video stream URL - ONLY USER API
+  getVideoStream: newUserVideoAPI.getVideoStream,
 
   // Check if video stream is available (for testing/demo purposes)
   checkVideoStreamAvailability: async (videoId) => {
@@ -108,9 +108,6 @@ export const userVideoAPI = {
       };
     }
   },
-
-  // Legacy compatibility - redirect to admin API for now
-  refreshVideoToken: newAdminVideoAPI.refreshVideoToken,
 };
 
 // ========================

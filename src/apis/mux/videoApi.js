@@ -31,10 +31,24 @@ export const videoService = {
   // User: Get video details
   getVideoDetails: userVideoAPI.getVideoDetails,
 
-  // User: Get video stream URL
-  getVideoStreamUrl: async (videoId, deviceFingerprint, watchTime = 0) => {
+  // User: Get video stream URL (with admin fallback)
+  getVideoStreamUrl: async (videoId, deviceFingerprint, watchTime = 0, strictUserMode = false) => {
     try {
-      const result = await userVideoAPI.getVideoStreamUrl(videoId, deviceFingerprint, watchTime);
+      let result;
+      
+      if (strictUserMode) {
+        // Strict user mode: Only use user endpoints, no admin fallback
+        result = await userVideoAPI.getVideoStream(videoId, {
+          deviceFingerprint,
+          watchTime
+        });
+      } else {
+        // Normal mode: Use user API with admin fallback
+        result = await userVideoAPI.getVideoStreamUrl(videoId, {
+          deviceFingerprint,
+          watchTime
+        });
+      }
       
       // Validate the stream URL before returning it
       if (result && result.streamUrl) {
@@ -50,6 +64,34 @@ export const videoService = {
       }
     } catch (error) {
       console.error('Error getting video stream URL:', error);
+      throw error;
+    }
+  },
+
+  // User: Get video stream URL (USER API ONLY - no admin fallback)
+  getUserVideoStream: async (videoId, deviceFingerprint, watchTime = 0) => {
+    try {
+      console.log('[videoService] Getting USER-ONLY stream for video:', videoId);
+      const result = await userVideoAPI.getVideoStream(videoId, {
+        deviceFingerprint,
+        watchTime
+      });
+      
+      // Validate the stream URL before returning it
+      if (result && result.streamUrl) {
+        try {
+          new URL(result.streamUrl);
+          console.log('[videoService] Valid USER stream URL received');
+          return result;
+        } catch (urlError) {
+          console.error('Invalid user stream URL received:', result.streamUrl);
+          throw new Error('Invalid video stream URL received from server');
+        }
+      } else {
+        throw new Error('No stream URL received from user endpoints');
+      }
+    } catch (error) {
+      console.error('[videoService] Error getting USER video stream:', error);
       throw error;
     }
   },

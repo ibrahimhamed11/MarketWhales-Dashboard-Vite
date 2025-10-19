@@ -42,10 +42,10 @@ import TradingtoolsTable from "views/admin/tradingtools";
 import CompetitionsTable from "views/admin/Competitions";
 import { MdEmojiEvents } from "react-icons/md";
 import videoCoursesManagement from "views/admin/videoCoursesManagement";
-import VideoUpload from "views/admin/videoUpload";
-import CourseVideosManagement from "views/admin/videoCourses/CourseVideosManagement";
-import VideoPlayerPage from "views/admin/videoCourses/VideoPlayerPage";
+import VideoUpload from "views/admin/adminvideoCourses/VideoUpload";
+import CourseVideosManagement from "views/admin/adminvideoCourses/CourseVideosManagement";
 import CoursePage from "views/user/CoursePage";
+import UserCoursesPage from "views/user/UserCoursesPage";
 import { MdVideoLibrary, MdPlayCircle, MdCloudUpload } from "react-icons/md";
 
 
@@ -69,47 +69,60 @@ const routes = [
     name: "Courses",
     layout: "/admin",
     icon: <Icon as={MdClass} width="20px" height="20px" color="inherit" />,
-    path: "/courses",
-    component: courses,
-  },
-  {
-    name: "Video Courses",
-    layout: "/admin",
-    icon: <Icon as={MdVideoLibrary} width="20px" height="20px" color="inherit" />,
-    path: "/video-courses",
-    component: videoCoursesManagement,
-  },
-  {
-    name: "Upload Video",
-    layout: "/admin",
-    icon: <Icon as={MdCloudUpload} width="20px" height="20px" color="inherit" />,
-    path: "/video-upload",
-    component: VideoUpload,
+    items: [
+      {
+        name: "Courses",
+        layout: "/admin",
+        icon: <Icon as={MdClass} width="20px" height="20px" color="inherit" />,
+        path: "/courses",
+        component: courses,
+      },
+      {
+        name: "Video Courses",
+        layout: "/admin",
+        icon: <Icon as={MdVideoLibrary} width="20px" height="20px" color="inherit" />,
+        path: "/video-courses",
+        component: videoCoursesManagement,
+      },
+      // User routes (for students/course viewers) - Now in admin layout
+      {
+        name: "My Courses",
+        layout: "/admin",
+        path: "/my-courses",
+        icon: <Icon as={MdPlayCircle} width="20px" height="20px" color="inherit" />,
+        component: UserCoursesPage,
+      },
+      {
+        name: "Course Viewer",
+        layout: "/admin",
+        path: "/my-course/:courseId",
+        component: CoursePage,
         hidden: true, // Hidden from sidebar
-
+      },
+      {
+        name: "Upload Video",
+        layout: "/admin",
+        icon: <Icon as={MdCloudUpload} width="20px" height="20px" color="inherit" />,
+        path: "/video-upload",
+        component: VideoUpload,
+        hidden: true, // Hidden from sidebar
+      },
+      {
+        name: "Upload Video for Course",
+        layout: "/admin",
+        path: "/upload-video/:courseId",
+        component: VideoUpload,
+        hidden: true, // Hidden from sidebar
+      },
+      {
+        name: "Course Videos Management",
+        layout: "/admin",
+        path: "/course-videos/:courseId",
+        component: CourseVideosManagement,
+        hidden: true, // Hidden from sidebar
+      },
+    ]
   },
-  {
-    name: "Upload Video for Course",
-    layout: "/admin",
-    path: "/upload-video/:courseId",
-    component: VideoUpload,
-    hidden: true, // Hidden from sidebar
-  },
-  {
-    name: "Course Videos Management",
-    layout: "/admin",
-    path: "/course-videos/:courseId",
-    component: CourseVideosManagement,
-    hidden: true, // Hidden from sidebar
-  },
-  {
-    name: "Video Player",
-    layout: "/admin",
-    path: "/video-player/:courseId/:videoId",
-    component: VideoPlayerPage,
-    hidden: true, // Hidden from sidebar
-  },
-
 
   {
     name: "Signals",
@@ -223,14 +236,7 @@ const routes = [
 
 
 
-  // User routes (for students/course viewers)
-  {
-    name: "Course Viewer",
-    layout: "/user",
-    path: "/course/:courseId",
-    component: CoursePage,
-    hidden: true, // Hidden from sidebar
-  },
+
 
   {
     name: "Sign In",

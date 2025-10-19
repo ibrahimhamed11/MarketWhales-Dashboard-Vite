@@ -1,194 +1,183 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useHistory } from 'react-router-dom';
-import {
-  Box,
-  Grid,
-  GridItem,
-  Text,
-  Progress,
-  VStack,
-  useColorModeValue,
-  Alert,
-  AlertIcon,
-  Spinner,
-  Button
-} from '@chakra-ui/react';
-import VideoList from '../../components/mux/VideoList';
-import MuxPlayer from '../../components/MuxPlayer';
-import ErrorBoundary from '../../components/ErrorBoundary';
+import React, { useState } from 'react';
+import { useHistory, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { Box, Typography, Grid, CircularProgress, ThemeProvider } from '@mui/material';
 
-const CoursePage = () => {
-  const { courseId } = useParams();
+// Hooks
+import useCourseVideos from '../../hooks/useCourseVideos';
+
+// Components
+import LoadingState from '../../components/shared/LoadingState';
+import ErrorState from '../../components/shared/ErrorState';
+import EmptyState from '../../components/shared/EmptyState';
+import CourseHeader from '../../components/shared/CourseHeader';
+import CourseInfoCard from '../../components/shared/CourseInfoCard';
+import VideoFilters from '../../components/shared/VideoFilters';
+import VideoCard from '../../components/shared/VideoCard';
+import VideoPlayerModal from '../../components/modal/VideoPlayerModal';
+
+// Utils & Config
+import { getFontFamily } from '../../utils/textUtils';
+import muiTheme from '../../theme/muiTheme';
+import * as styles from './UserPages.styles';
+
+/**
+ * UserCoursePage Component
+ * Displays a course with its videos for user viewing
+ */
+const UserCoursePage = () => {
+  const { t } = useTranslation();
   const history = useHistory();
+  const { courseId } = useParams();
+
+  // Video player modal state
+  const [videoPlayerOpen, setVideoPlayerOpen] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState(null);
-  const [watchProgress, setWatchProgress] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
-  const bgColor = useColorModeValue('white', 'gray.800');
-  const borderColor = useColorModeValue('gray.200', 'gray.600');
+  // Course data hook
+  const {
+    course,
+    videos,
+    filteredVideos,
+    loading,
+    error,
+    videosLoading,
+    search,
+    setSearch,
+    sortBy,
+    setSortBy,
+    refetchCourse,
+  } = useCourseVideos(courseId, false); // false = user mode
 
-  useEffect(() => {
-    // Check authentication
-    const token = localStorage.getItem('token');
-    if (!token) {
-      console.warn('No authentication token found, redirecting to login');
-      history.push('/auth/sign-in');
-      return;
-    }
+  // Sort options for dropdown
+  const sortOptions = [
+    { value: 'order', label: t('common.order') },
+    { value: 'title', label: t('common.title') },
+    { value: 'uploadedAt', label: t('common.uploadDate') },
+  ];
 
-    // Validate courseId
-    if (!courseId) {
-      setError('No course ID provided');
-      setLoading(false);
-      return;
-    }
-
-    // Set loading to false after initial checks
-    setLoading(false);
-  }, [courseId, history]);
-
-  const handleVideoSelect = (video) => {
+  // Event Handlers
+  const handlePlayVideo = (video) => {
     setSelectedVideo(video);
+    setVideoPlayerOpen(true);
   };
 
-  const handleProgress = (currentTime, duration, progress) => {
-    setWatchProgress(prev => ({
-      ...prev,
-      [selectedVideo._id]: {
-        currentTime,
-        duration,
-        progress
-      }
-    }));
+  const handleCloseModal = () => {
+    setVideoPlayerOpen(false);
+    setSelectedVideo(null);
   };
 
-  const handleComplete = (duration) => {
-    console.log('Video completed:', selectedVideo.title);
-    setWatchProgress(prev => ({
-      ...prev,
-      [selectedVideo._id]: {
-        currentTime: duration,
-        duration,
-        progress: 100,
-        completed: true
-      }
-    }));
+  const handleBackToCourses = () => {
+    history.push('/admin/my-courses');
   };
 
+  // Render videos content section
+  const renderVideosContent = () => {
+    // Loading state
+    if (videosLoading) {
+      return (
+        <Box sx={styles.videosLoadingBoxStyles}>
+          <CircularProgress sx={styles.videosLoadingProgressStyles} />
+          <Typography variant="h6" sx={{ fontFamily: getFontFamily(t('user.coursePage.loadingVideos')) }}>
+            {t('user.coursePage.loadingVideos')}
+          </Typography>
+        </Box>
+      );
+    }
+
+    // Empty state
+    if (filteredVideos.length === 0) {
+      return (
+        <EmptyState
+          title={search ? t('user.coursePage.noVideosMatch') : t('user.coursePage.noVideosYet')}
+          description={
+            search ? t('user.courses.adjustSearchTerms') : t('user.coursePage.videosWillAppear')
+          }
+        />
+      );
+    }
+
+    // Videos grid
+    return (
+      <Grid {...styles.videosGridContainerStyles}>
+        {filteredVideos.map((video) => (
+          <Grid item {...styles.getVideoGridItemStyles('grid')} key={video._id}>
+            <VideoCard
+              video={video}
+              viewMode="grid"
+              onPlayVideo={handlePlayVideo}
+              t={t}
+            />
+          </Grid>
+        ))}
+      </Grid>
+    );
+  };
+
+  // Render loading state
   if (loading) {
     return (
-      <Box pt={{ base: "130px", md: "80px", xl: "80px" }} px={{ xs: 1, sm: 1 }}>
-        <VStack spacing={4} justify="center" minH="400px">
-          <Spinner size="xl" />
-          <Text>Loading course...</Text>
-        </VStack>
-      </Box>
+      <ThemeProvider theme={muiTheme}>
+        <LoadingState message={t('user.coursePage.loadingCourse')} />
+      </ThemeProvider>
     );
   }
 
+  // Render error state
   if (error) {
     return (
-      <Box pt={{ base: "130px", md: "80px", xl: "80px" }} px={{ xs: 1, sm: 1 }}>
-        <Alert status="error" mb={4}>
-          <AlertIcon />
-          {error}
-        </Alert>
-        <Button onClick={() => history.push('/admin')} colorScheme="blue">
-          Go Back to Dashboard
-        </Button>
-      </Box>
+      <ThemeProvider theme={muiTheme}>
+        <ErrorState
+          message={error}
+          onRetry={refetchCourse}
+          retryText={t('common.tryAgain')}
+        />
+      </ThemeProvider>
     );
   }
 
+  // Render main content
   return (
-    <ErrorBoundary>
-      <Box pt={{ base: "130px", md: "80px", xl: "80px" }} px={{ xs: 1, sm: 1 }}>
-        <VStack spacing={4} align="stretch">
-          <Box>
-            <Button 
-              onClick={() => history.push('/admin')} 
-              variant="outline" 
-              size="sm"
-              mb={4}
-            >
-              ← Back to Dashboard
-            </Button>
-            <Text fontSize="2xl" fontWeight="bold" mb={6}>
-              Course Videos
-            </Text>
-          </Box>
-        
-        <Grid templateColumns={{ base: "1fr", lg: "350px 1fr" }} gap={6}>
-          <GridItem>
-            <Box 
-              bg={bgColor} 
-              p={4} 
-              borderRadius="lg" 
-              border="1px solid" 
-              borderColor={borderColor}
-              h="fit-content"
-            >
-              <VideoList 
-                courseId={courseId}
-                isAdmin={false}
-                onVideoSelect={handleVideoSelect}
-              />
-            </Box>
-          </GridItem>
-          
-          <GridItem>
-            <Box 
-              bg={bgColor} 
-              p={6} 
-              borderRadius="lg" 
-              border="1px solid" 
-              borderColor={borderColor}
-            >
-              {selectedVideo ? (
-                <VStack spacing={4} align="stretch">
-                  <Text fontSize="lg" fontWeight="bold">
-                    {selectedVideo.title}
-                  </Text>
-                  <MuxPlayer 
-                    videoId={selectedVideo._id}
-                    onProgress={handleProgress}
-                    onComplete={handleComplete}
-                    onError={(err) => {
-                      console.error('Video playback error:', err);
-                      setError('Video playback failed. Please try again or contact support.');
-                    }}
-                  />
-                  
-                  {selectedVideo && watchProgress[selectedVideo._id] && (
-                    <Box>
-                      <Text fontSize="sm" mb={2}>
-                        Progress: {Math.round(watchProgress[selectedVideo._id].progress)}%
-                      </Text>
-                      <Progress 
-                        value={watchProgress[selectedVideo._id].progress} 
-                        colorScheme="blue"
-                        size="sm"
-                        borderRadius="md"
-                      />
-                    </Box>
-                  )}
-                </VStack>
-              ) : (
-                <VStack spacing={4} justify="center" minH="400px">
-                  <Text fontSize="6xl">📹</Text>
-                  <Text fontSize="lg" color="gray.500">
-                    Select a video to start watching
-                  </Text>
-                </VStack>
-              )}
-            </Box>
-          </GridItem>
-        </Grid>
-      </VStack>
-    </Box>
-    </ErrorBoundary>
+    <ThemeProvider theme={muiTheme}>
+      <Box sx={{ ...styles.containerStyles, ...styles.maxWidthContainerStyles }}>
+        {/* Course Header */}
+        <CourseHeader
+          courseName={course?.name}
+          videoCount={videos.length}
+          onBack={handleBackToCourses}
+          t={t}
+        />
+
+        {/* Course Information Card */}
+        <CourseInfoCard course={course} />
+
+        {/* Video Filters */}
+        {videos.length > 0 && (
+          <VideoFilters
+            search={search}
+            onSearchChange={setSearch}
+            sortBy={sortBy}
+            onSortChange={setSortBy}
+            searchPlaceholder={t('user.coursePage.searchVideos')}
+            sortLabel={t('common.sortBy')}
+            sortOptions={sortOptions}
+          />
+        )}
+
+        {/* Videos Content */}
+        {renderVideosContent()}
+
+        {/* Video Player Modal */}
+        <VideoPlayerModal
+          open={videoPlayerOpen}
+          onClose={handleCloseModal}
+          video={selectedVideo}
+          courseTitle={course?.name}
+          isUserMode={true}
+        />
+      </Box>
+    </ThemeProvider>
   );
 };
 
-export default CoursePage;
+export default UserCoursePage;

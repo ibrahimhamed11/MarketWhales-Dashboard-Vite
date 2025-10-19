@@ -4,9 +4,9 @@ import { PlayCircleFilled as PlayCircleFilledIcon } from '@mui/icons-material';
 
 /**
  * EmptyState Component
- * Displays an empty state with icon, title, and description
+ * Displays an empty state with icon, title, description, and optional children
  */
-const EmptyState = ({ icon: Icon = PlayCircleFilledIcon, title, description, iconSize = 80 }) => {
+const EmptyState = ({ icon: Icon = PlayCircleFilledIcon, title, description, iconSize = 80, children }) => {
   return (
     <Card sx={{ p: 6, textAlign: 'center' }}>
       <Icon sx={{ fontSize: iconSize, color: 'text.secondary', mb: 2 }} />
@@ -16,6 +16,7 @@ const EmptyState = ({ icon: Icon = PlayCircleFilledIcon, title, description, ico
       <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
         {description}
       </Typography>
+      {children}
     </Card>
   );
 };

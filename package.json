@@ -5,10 +5,20 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:local": "cp .env.local .env && vite",
+    "dev:prod": "cp .env.production .env 2>/dev/null || echo 'Using default .env' && vite",
+    "start": "npm run dev",
+    "start:local": "npm run dev:local", 
+    "start:prod": "npm run dev:prod",
     "build": "vite build",
+    "build:local": "cp .env.local .env && vite build",
+    "build:prod": "vite build",
     "preview": "vite preview",
     "lint": "eslint .",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "env:local": "cp .env.local .env && echo 'Switched to LOCAL environment (http://localhost:4000)'",
+    "env:prod": "cp .env .env.backup 2>/dev/null; echo 'VITE_API_URL=https://market-whales.onrender.com' > .env && echo 'Switched to PRODUCTION environment (https://market-whales.onrender.com)'",
+    "env:status": "echo 'Current API URL:' && grep VITE_API_URL .env 2>/dev/null || echo 'No .env file found'"
   },
   "dependencies": {
     "@chakra-ui/icons": "^1.1.5",
@@ -33,7 +43,7 @@
     "dayjs": "^1.11.13",
     "formik": "^2.4.5",
     "framer-motion": "^4.1.17",
-    "hls.js": "^1.6.13",
+    "hls.js": "1.6.13",
     "i18n-iso-countries": "^7.14.0",
     "i18next": "^25.5.3",
     "i18next-browser-languagedetector": "^8.2.0",

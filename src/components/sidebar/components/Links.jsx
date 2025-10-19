@@ -1,8 +1,9 @@
 /* eslint-disable */
-import React from "react";
+import React, { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 // chakra imports
-import { Box, Flex, HStack, Text, useColorModeValue } from "@chakra-ui/react";
+import { Box, Flex, HStack, Text, useColorModeValue, Icon, Collapse } from "@chakra-ui/react";
+import { MdExpandMore, MdExpandLess } from "react-icons/md";
 
 export function SidebarLinks(props) {
   //   Chakra color mode
@@ -17,10 +18,46 @@ export function SidebarLinks(props) {
   let brandColor = useColorModeValue("brand.500", "brand.400");
 
   const { routes } = props;
+  
+  // State to manage expanded menus
+  const [expandedMenus, setExpandedMenus] = useState({});
+
+  // Auto-expand menus that have active children
+  React.useEffect(() => {
+    const checkActiveRoutes = (routes) => {
+      routes.forEach(route => {
+        if (route.items && hasActiveChild(route.items)) {
+          setExpandedMenus(prev => ({
+            ...prev,
+            [route.name]: true
+          }));
+        }
+      });
+    };
+    checkActiveRoutes(routes);
+  }, [location.pathname]);
 
   // verifies if routeName is the one active (in browser input)
   const activeRoute = (routeName) => {
     return location.pathname.includes(routeName);
+  };
+
+  // Toggle expanded state for menus
+  const toggleMenu = (menuName) => {
+    setExpandedMenus(prev => ({
+      ...prev,
+      [menuName]: !prev[menuName]
+    }));
+  };
+
+  // Check if any child route is active
+  const hasActiveChild = (items) => {
+    if (!items) return false;
+    return items.some(item => {
+      if (item.path && activeRoute(item.path.toLowerCase())) return true;
+      if (item.items) return hasActiveChild(item.items);
+      return false;
+    });
   };
 
   // this function creates the links from the secondary accordions (for example auth -> sign-in -> default)
@@ -31,7 +68,61 @@ export function SidebarLinks(props) {
         return null;
       }
       
-      if (route.category) {
+      // Handle nested menu items
+      if (route.items) {
+        const isExpanded = expandedMenus[route.name];
+        const hasActive = hasActiveChild(route.items);
+        
+        return (
+          <Box key={index}>
+            <Box
+              onClick={() => toggleMenu(route.name)}
+              cursor="pointer"
+              _hover={{ bg: useColorModeValue("gray.50", "whiteAlpha.100") }}
+              borderRadius="md"
+              mx="2"
+              mb="2"
+            >
+              <HStack
+                spacing="22px"
+                py='5px'
+                ps='10px'
+                pr="4px"
+              >
+                <Flex w='100%' alignItems='center' justifyContent='space-between'>
+                  <HStack spacing="18px">
+                    {route.icon && (
+                      <Box
+                        color={hasActive ? activeIcon : textColor}
+                      >
+                        {route.icon}
+                      </Box>
+                    )}
+                    <Text
+                      color={hasActive ? activeColor : textColor}
+                      fontWeight={hasActive ? "bold" : "normal"}
+                      fontSize="md"
+                    >
+                      {route.name}
+                    </Text>
+                  </HStack>
+                  <Icon
+                    as={isExpanded ? MdExpandLess : MdExpandMore}
+                    color={textColor}
+                    w="20px"
+                    h="20px"
+                  />
+                </Flex>
+              </HStack>
+            </Box>
+            <Collapse in={isExpanded} animateOpacity>
+              <Box pl="8px">
+                {createLinks(route.items)}
+              </Box>
+            </Collapse>
+          </Box>
+        );
+      } else if (route.category) {
         return (
           <>
             <Text
@@ -52,82 +143,90 @@ export function SidebarLinks(props) {
           </>
         );
       } else if (
+        route.path && (
         route.layout === "/admin" ||
         route.layout === "/auth" ||
-        route.layout === "/rtl"
+        route.layout === "/rtl" ||
+        route.layout === "/user")
       ) {
         return (
-          <NavLink key={index} to={route.layout + route.path}>
-            {route.icon ? (
-              <Box>
+          <Box
+            key={index}
+            _hover={{ bg: useColorModeValue("gray.50", "whiteAlpha.100") }}
+            borderRadius="md"
+            mx="2"
+            mb="1"
+          >
+            <NavLink to={route.layout + route.path} style={{ display: 'block', textDecoration: 'none' }}>
+              {route.icon ? (
                 <HStack
                   spacing={
-                    activeRoute(route.path.toLowerCase()) ? "22px" : "26px"
+                    activeRoute(route.path?.toLowerCase()) ? "22px" : "26px"
                   }
                   py='5px'
-                  ps='10px'>
-                  <Flex w='100%' alignItems='center' justifyContent='center'>
+                  ps='10px'
+                  pr='10px'>
+                  <Flex w='100%' alignItems='center' justifyContent='space-between'>
+                    <HStack spacing="18px">
+                      <Box
+                        color={
+                          activeRoute(route.path?.toLowerCase())
+                            ? activeIcon
+                            : textColor
+                        }>
+                        {route.icon}
+                      </Box>
+                      <Text
+                        color={
+                          activeRoute(route.path?.toLowerCase())
+                            ? activeColor
+                            : textColor
+                        }
+                        fontWeight={
+                          activeRoute(route.path?.toLowerCase())
+                            ? "bold"
+                            : "normal"
+                        }>
+                        {route.name}
+                      </Text>
+                    </HStack>
                     <Box
-                      color={
-                        activeRoute(route.path.toLowerCase())
-                          ? activeIcon
-                          : textColor
+                      h='36px'
+                      w='4px'
+                      bg={
+                        activeRoute(route.path?.toLowerCase())
+                          ? brandColor
+                          : "transparent"
                       }
-                      me='18px'>
-                      {route.icon}
-                    </Box>
-                    <Text
-                      me='auto'
-                      color={
-                        activeRoute(route.path.toLowerCase())
-                          ? activeColor
-                          : textColor
-                      }
-                      fontWeight={
-                        activeRoute(route.path.toLowerCase())
-                          ? "bold"
-                          : "normal"
-                      }>
-                      {route.name}
-                    </Text>
+                      borderRadius='5px'
+                    />
                   </Flex>
-                  <Box
-                    h='36px'
-                    w='4px'
-                    bg={
-                      activeRoute(route.path.toLowerCase())
-                        ? brandColor
-                        : "transparent"
-                    }
-                    borderRadius='5px'
-                  />
                 </HStack>
-              </Box>
-            ) : (
-              <Box>
+              ) : (
                 <HStack
                   spacing={
-                    activeRoute(route.path.toLowerCase()) ? "22px" : "26px"
+                    activeRoute(route.path?.toLowerCase()) ? "22px" : "26px"
                   }
                   py='5px'
-                  ps='10px'>
+                  ps='10px'
+                  pr='10px'>
                   <Text
                     me='auto'
                     color={
-                      activeRoute(route.path.toLowerCase())
+                      activeRoute(route.path?.toLowerCase())
                         ? activeColor
                         : inactiveColor
                     }
                     fontWeight={
-                      activeRoute(route.path.toLowerCase()) ? "bold" : "normal"
+                      activeRoute(route.path?.toLowerCase()) ? "bold" : "normal"
                     }>
                     {route.name}
                   </Text>
                   <Box h='36px' w='4px' bg='brand.400' borderRadius='5px' />
                 </HStack>
-              </Box>
-            )}
-          </NavLink>
+              )}
+            </NavLink>
+          </Box>
         );
       }
     });

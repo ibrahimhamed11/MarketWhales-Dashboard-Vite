@@ -315,39 +315,216 @@ export const adminVideoAPI = {
 // ========================
 
 export const userVideoAPI = {
-  // Get course videos (user view) - uses admin endpoint for now
+  // Get course videos (user view) - uses USER endpoint
   getCourseVideos: async (courseId) => {
     try {
+      console.log('[USER API] Fetching course videos for courseId:', courseId);
+      console.log('[USER API] Using endpoint:', API_ENDPOINTS.USER_VIDEOS.COURSE_VIDEOS(courseId));
+      
       const response = await axiosInstance.get(
         API_ENDPOINTS.USER_VIDEOS.COURSE_VIDEOS(courseId),
         REQUEST_CONFIG.json()
       );
       
+      console.log('[USER API] Raw response:', response.data);
+      
       // Handle response structure - return videos array if available
       if (response.data && response.data.videos && Array.isArray(response.data.videos)) {
+        console.log('[USER API] Returning videos array with', response.data.videos.length, 'videos');
         return response.data.videos;
+      } else if (response.data && Array.isArray(response.data)) {
+        console.log('[USER API] Response is already an array with', response.data.length, 'videos');
+        return response.data;
       } else {
+        console.warn('[USER API] Unexpected response structure, returning as-is:', response.data);
         return response.data;
       }
     } catch (error) {
+      console.error(`[USER API] Failed to get user course videos for courseId ${courseId}:`, {
+        endpoint: API_ENDPOINTS.USER_VIDEOS.COURSE_VIDEOS(courseId),
+        status: error.response?.status,
+        message: error.response?.data?.error || error.message
+      });
       throw error;
     }
   },
 
-  // Get video details for user - uses admin endpoint
+  // Get video details for user - uses USER endpoint
   getVideoDetails: async (videoId) => {
     try {
       const response = await axiosInstance.get(
-        API_ENDPOINTS.ADMIN_VIDEOS.VIDEO_BY_ID(videoId),
+        API_ENDPOINTS.USER_VIDEOS.VIDEO_DETAILS(videoId),
         REQUEST_CONFIG.json()
       );
       return response.data;
     } catch (error) {
+      console.error(`Failed to get user video details for videoId ${videoId}:`, {
+        endpoint: API_ENDPOINTS.USER_VIDEOS.VIDEO_DETAILS(videoId),
+        status: error.response?.status,
+        message: error.response?.data?.error || error.message
+      });
       throw error;
     }
   },
 
+  // Get secure video stream URL for user (uses POST as per backend)
+  getVideoStream: async (videoId, streamData = {}) => {
+    try {
+      const requestData = {
+        watchTime: streamData.watchTime || 0,
+        deviceFingerprint: streamData.deviceFingerprint || 'web-dashboard',
+        userAgent: navigator.userAgent,
+        timestamp: Date.now(),
+        ...streamData
+      };
+      
+      const response = await axiosInstance.post(
+        API_ENDPOINTS.USER_VIDEOS.VIDEO_STREAM(videoId),
+        requestData,
+        REQUEST_CONFIG.video()
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Failed to get user video stream for videoId ${videoId}:`, {
+        endpoint: API_ENDPOINTS.USER_VIDEOS.VIDEO_STREAM(videoId),
+        status: error.response?.status,
+        message: error.response?.data?.error || error.message
+      });
+      throw error;
+    }
+  },
 
+  // Get video stream URL (alternative endpoint)
+  getVideoStreamUrl: async (videoId, streamData = {}) => {
+    try {
+      const requestData = {
+        watchTime: streamData.watchTime || 0,
+        deviceFingerprint: streamData.deviceFingerprint || 'web-dashboard',
+        userAgent: navigator.userAgent,
+        timestamp: Date.now(),
+        ...streamData
+      };
+      
+      const response = await axiosInstance.post(
+        API_ENDPOINTS.USER_VIDEOS.VIDEO_STREAM_URL(videoId),
+        requestData,
+        REQUEST_CONFIG.video()
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Failed to get user video stream URL for videoId ${videoId}:`, {
+        endpoint: API_ENDPOINTS.USER_VIDEOS.VIDEO_STREAM_URL(videoId),
+        status: error.response?.status,
+        message: error.response?.data?.error || error.message
+      });
+      throw error;
+    }
+  },
+
+  // Update video watch progress
+  updateWatchProgress: async (videoId, progressData) => {
+    try {
+      const response = await axiosInstance.put(
+        API_ENDPOINTS.USER_VIDEOS.VIDEO_PROGRESS(videoId),
+        progressData,
+        REQUEST_CONFIG.json()
+      );
+      return response.data;
+    } catch (error) {
+      // Fallback to POST if PUT fails
+      try {
+        const response = await axiosInstance.post(
+          API_ENDPOINTS.USER_VIDEOS.VIDEO_PROGRESS(videoId),
+          progressData,
+          REQUEST_CONFIG.json()
+        );
+        return response.data;
+      } catch (postError) {
+        console.error(`Failed to update watch progress for videoId ${videoId}:`, {
+          endpoint: API_ENDPOINTS.USER_VIDEOS.VIDEO_PROGRESS(videoId),
+          status: postError.response?.status,
+          message: postError.response?.data?.error || postError.message
+        });
+        throw postError;
+      }
+    }
+  },
+
+  // Get course watch progress
+  getCourseProgress: async (courseId) => {
+    try {
+      const response = await axiosInstance.get(
+        API_ENDPOINTS.USER_VIDEOS.COURSE_PROGRESS(courseId),
+        REQUEST_CONFIG.json()
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Failed to get course progress for courseId ${courseId}:`, {
+        endpoint: API_ENDPOINTS.USER_VIDEOS.COURSE_PROGRESS(courseId),
+        status: error.response?.status,
+        message: error.response?.data?.error || error.message
+      });
+      throw error;
+    }
+  },
+
+  // Refresh video token
+  refreshVideoToken: async (tokenData) => {
+    try {
+      const response = await axiosInstance.post(
+        API_ENDPOINTS.USER_VIDEOS.REFRESH_TOKEN,
+        tokenData,
+        REQUEST_CONFIG.json()
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Failed to refresh video token:', error);
+      throw error;
+    }
+  },
+
+  // Validate access token
+  validateAccessToken: async (tokenData) => {
+    try {
+      const response = await axiosInstance.post(
+        API_ENDPOINTS.USER_VIDEOS.VALIDATE_TOKEN,
+        tokenData,
+        REQUEST_CONFIG.json()
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Failed to validate access token:', error);
+      throw error;
+    }
+  },
+
+  // Get video manifest
+  getVideoManifest: async (videoId) => {
+    try {
+      const response = await axiosInstance.get(
+        API_ENDPOINTS.USER_VIDEOS.VIDEO_MANIFEST(videoId),
+        REQUEST_CONFIG.video()
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Failed to get video manifest for videoId ${videoId}:`, error);
+      throw error;
+    }
+  },
+
+  // Get video playlist for course
+  getVideoPlaylist: async (courseId) => {
+    try {
+      const response = await axiosInstance.get(
+        API_ENDPOINTS.USER_VIDEOS.VIDEO_PLAYLIST(courseId),
+        REQUEST_CONFIG.json()
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Failed to get video playlist for courseId ${courseId}:`, error);
+      throw error;
+    }
+  },
 };
 
 // ========================

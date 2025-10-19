@@ -1,4 +1,4 @@
-import axiosInstance from "utils/axios";
+import axiosInstance from "../axios";
 
 export const fetchBlogPosts = async () => {
   try {

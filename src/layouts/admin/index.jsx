@@ -8,8 +8,9 @@ import { SidebarContext } from '../../contexts/SidebarContext';
 import React, { useState } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import routes from '../../routes.jsx';
-import VideoUpload from '../../views/admin/videoCourses/VideoUpload';
-import VideoPlayerPage from '../../views/admin/videoCourses/VideoPlayerPage';
+import VideoUpload from '../../views/admin/adminvideoCourses/VideoUpload';
+import UserCoursesPage from '../../views/user/UserCoursesPage';
+import UserCoursePage from '../../views/user/CoursePage';
 
 // Custom Chakra theme
 export default function Dashboard(props) {
@@ -47,8 +48,13 @@ export default function Dashboard(props) {
 				if (categoryActiveRoute !== activeRoute) {
 					return categoryActiveRoute;
 				}
+			} else if (routes[i].items) {
+				let nestedActiveRoute = getActiveRoute(routes[i].items);
+				if (nestedActiveRoute !== activeRoute) {
+					return nestedActiveRoute;
+				}
 			} else {
-				if (window.location.href.indexOf(routes[i].layout + routes[i].path) !== -1) {
+				if (routes[i].path && window.location.href.indexOf(routes[i].layout + routes[i].path) !== -1) {
 					return routes[i].name;
 				}
 			}
@@ -68,8 +74,13 @@ export default function Dashboard(props) {
 				if (categoryActiveNavbar !== activeNavbar) {
 					return categoryActiveNavbar;
 				}
+			} else if (routes[i].items) {
+				let nestedActiveNavbar = getActiveNavbar(routes[i].items);
+				if (nestedActiveNavbar !== activeNavbar) {
+					return nestedActiveNavbar;
+				}
 			} else {
-				if (window.location.href.indexOf(routes[i].layout + routes[i].path) !== -1) {
+				if (routes[i].path && window.location.href.indexOf(routes[i].layout + routes[i].path) !== -1) {
 					return routes[i].secondary;
 				}
 			}
@@ -89,8 +100,13 @@ export default function Dashboard(props) {
 				if (categoryActiveNavbar !== activeNavbar) {
 					return categoryActiveNavbar;
 				}
+			} else if (routes[i].items) {
+				let nestedActiveNavbar = getActiveNavbarText(routes[i].items);
+				if (nestedActiveNavbar !== activeNavbar) {
+					return nestedActiveNavbar;
+				}
 			} else {
-				if (window.location.href.indexOf(routes[i].layout + routes[i].path) !== -1) {
+				if (routes[i].path && window.location.href.indexOf(routes[i].layout + routes[i].path) !== -1) {
 					return routes[i].messageNavbar;
 				}
 			}
@@ -99,13 +115,16 @@ export default function Dashboard(props) {
 	};
 	const getRoutes = (routes) => {
 		return routes.map((prop, key) => {
-			if (prop.layout === '/admin') {
+			if (prop.layout === '/admin' && prop.path) {
 				return <Route path={prop.layout + prop.path} component={prop.component} key={key} />;
 			}
 			if (prop.collapse) {
 				return getRoutes(prop.items);
 			}
 			if (prop.category) {
+				return getRoutes(prop.items);
+			}
+			if (prop.items) {
 				return getRoutes(prop.items);
 			} else {
 				return null;
@@ -168,7 +187,6 @@ export default function Dashboard(props) {
 						) : (
 							<Switch>
 								{/* Routes that don't need the standard layout padding (full-screen routes) */}
-								<Route path='/admin/video-player/:courseId/:videoId' component={VideoPlayerPage} />
 								{getRoutes(routes)}
 								<Redirect from='/' to='/admin/default' />
 							</Switch>

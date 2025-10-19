@@ -122,7 +122,6 @@ const CashbackTable = () => {
           style={{
             backgroundColor: getStatusColor(row.original.status),
             padding: "5px",
-            borderRadius: "3px",
             color: "white",
             minWidth: "80px",
             display: "inline-block",

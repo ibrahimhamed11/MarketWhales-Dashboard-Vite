@@ -27,7 +27,6 @@ const VideoFilters = ({
       sx={{
         display: 'flex',
         gap: 2,
-        alignItems: 'center',
         mb: 4,
         mt: 4,
         flexWrap: 'wrap',

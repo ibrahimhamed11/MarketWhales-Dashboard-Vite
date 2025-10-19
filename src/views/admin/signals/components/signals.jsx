@@ -54,8 +54,6 @@ const CoursesTable = () => {
     status: "",
     result: 0,
     analysesLink: "",
-    vip:false,
-    signalType: "",
 
   });
   const [editSignalData, setEditSignalData] = useState({

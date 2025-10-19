@@ -149,9 +149,9 @@ const VideoUploadForm = () => {
 
       setUploadComplete(true);
 
-      // Navigate back to video courses management after 2 seconds
+      // Navigate back to course video management after 2 seconds
       setTimeout(() => {
-        history.push('/admin/video-courses');
+        history.push(`/admin/video-courses/${courseId}/videos`);
       }, 2000);
       
     } catch (error) {
@@ -178,11 +178,11 @@ const VideoUploadForm = () => {
   };
 
   const handleGoBack = () => {
-    history.push('/admin/video-courses');
+    history.push(`/admin/video-courses/${courseId}/videos`);
   };
 
   const handleGoToDashboard = () => {
-    history.push('/admin/video-courses');
+    history.push(`/admin/video-courses/${courseId}/videos`);
   };
 
   if (!courseId) {

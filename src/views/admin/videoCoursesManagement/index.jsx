@@ -1,5 +1,5 @@
 import { Box } from "@chakra-ui/react";
-import CourseManagementDashboard from '../videoCourses/CourseManagementDashboard';
+import CourseManagementDashboard from '../adminvideoCourses/CourseManagementDashboard';
 
 export default function VideoCoursesManagement() {
   return (

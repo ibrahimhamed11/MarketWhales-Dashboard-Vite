@@ -29,7 +29,19 @@
     "share": "مشاركة",
     "copy": "نسخ",
     "paste": "لصق",
-    "refresh": "تحديث"
+    "refresh": "تحديث",
+    "sortBy": "ترتيب حسب",
+    "allTypes": "جميع الأنواع",
+    "paidOnly": "مدفوعة فقط",
+    "freeOnly": "مجانية فقط",
+    "students": "طلاب",
+    "student": "طالب",
+    "videos": "فيديوهات",
+    "video": "فيديو",
+    "duration": "المدة",
+    "order": "الترتيب",
+    "title": "العنوان",
+    "uploadDate": "تاريخ الرفع"
   },
   "navigation": {
     "dashboard": "لوحة التحكم",
@@ -37,12 +49,19 @@
     "videos": "الفيديوهات",
     "settings": "الإعدادات",
     "profile": "الملف الشخصي",
-    "logout": "تسجيل الخروج"
+    "logout": "تسجيل الخروج",
+    "myCourses": "دوراتي",
+    "backToCourses": "العودة إلى الدورات",
+    "home": "الرئيسية",
+    "aboutUs": "من نحن",
+    "contact": "اتصل بنا",
+    "help": "مساعدة"
   },
   "courseManagement": {
     "title": "لوحة إدارة الدورات",
     "subtitle": "إدارة دوراتك، رفع الفيديوهات، وتتبع تحليلات الأداء",
     "createNewCourse": "إنشاء دورة جديدة",
+    "createCourse": "إنشاء دورة",
     "allCourses": "جميع الدورات",
     "searchCourses": "البحث في الدورات...",
     "courseType": "نوع الدورة",
@@ -56,11 +75,13 @@
     "students": "طلاب",
     "manageVideos": "إدارة الفيديوهات",
     "uploadVideo": "رفع فيديو",
+    "viewAsUser": "عرض كمستخدم",
     "noCoursesFound": "لا توجد دورات تطابق بحثك",
     "noCoursesAvailable": "لا توجد دورات متاحة",
     "adjustSearchTerms": "جرب تعديل مصطلحات البحث",
     "createFirstCourse": "أنشئ دورتك الأولى للبدء",
-    "loadingCourses": "جاري تحميل الدورات..."
+    "loadingCourses": "جاري تحميل الدورات...",
+    "tryAgain": "حاول مرة أخرى"
   },
   "videoManagement": {
     "title": "إدارة الفيديوهات",
@@ -124,6 +145,39 @@
     "maxLength": "الحد الأقصى للطول هو {{count}} أحرف",
     "positiveNumber": "يجب أن يكون رقماً موجباً",
     "validUrl": "يجب أن يكون رابطاً صحيحاً"
+  },
+  "user": {
+    "courses": {
+      "title": "دوراتي",
+      "subtitle": "الوصول إلى الدورات المسجلة وتتبع تقدم التعلم",
+      "enrolledCourses": "الدورات المسجلة",
+      "paidCourses": "الدورات المدفوعة",
+      "freeCourses": "الدورات المجانية",
+      "totalVideos": "إجمالي الفيديوهات",
+      "allCourses": "جميع الدورات",
+      "searchPlaceholder": "البحث في الدورات...",
+      "courseType": "نوع الدورة",
+      "noCoursesEnrolled": "لم تسجل في أي دورات بعد",
+      "noCoursesMatch": "لا توجد دورات تطابق بحثك",
+      "enrollToBrowse": "تصفح كتالوج الدورات وسجل للبدء في التعلم",
+      "adjustSearchTerms": "حاول تعديل مصطلحات البحث",
+      "startLearning": "ابدأ التعلم",
+      "loadingCourses": "جاري تحميل دوراتك..."
+    },
+    "coursePage": {
+      "title": "فيديوهات الدورة",
+      "loadingCourse": "جاري تحميل الدورة...",
+      "videosAvailable": "فيديوهات متاحة",
+      "videoAvailable": "فيديو متاح",
+      "searchVideos": "البحث في الفيديوهات...",
+      "watchNow": "شاهد الآن",
+      "fullScreen": "ملء الشاشة",
+      "noVideosYet": "لا توجد فيديوهات متاحة بعد",
+      "noVideosMatch": "لا توجد فيديوهات تطابق بحثك",
+      "videosWillAppear": "ستظهر الفيديوهات هنا بمجرد إضافتها إلى هذه الدورة",
+      "loadingVideos": "جاري تحميل الفيديوهات...",
+      "noDescriptionAvailable": "لا يوجد وصف متاح"
+    }
   },
   "messages": {
     "operationSuccess": "تمت العملية بنجاح",

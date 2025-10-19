@@ -485,7 +485,7 @@ const CoursesTable = () => {
             color="secondary"
             onClick={() => {
               // Open user course view in new tab
-              window.open(`/user/course/${row.original._id}`, '_blank');
+              window.open(`/admin/my-course/${row.original._id}`, '_blank');
             }}
             title="View as User"
           >

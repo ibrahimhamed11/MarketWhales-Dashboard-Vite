@@ -13,6 +13,7 @@ const MuxVideoPlayer = ({
   onEnded,
   autoPlay = false, 
   style = {},
+  userMode = false, // New prop to determine API usage
   ...props 
 }) => {
   const [streamData, setStreamData] = useState(null);
@@ -23,20 +24,26 @@ const MuxVideoPlayer = ({
     if (videoId) {
       loadVideoStream();
     }
-  }, [videoId]);
+  }, [videoId, userMode]);
 
   const loadVideoStream = async () => {
     try {
       setLoading(true);
       setError(null);
       
-      // Try Mux admin stream first, fallback to user stream
       let data;
-      try {
-        data = await videoService.getAdminVideoStream(videoId);
-      } catch (adminError) {
+      
+      if (userMode) {
+        // User mode: Use ONLY user video APIs
+        console.log('[MuxVideoPlayer] Loading video in USER mode for videoId:', videoId);
         const deviceFingerprint = generateDeviceFingerprint();
-        data = await videoService.getVideoStreamUrl(videoId, deviceFingerprint);
+        data = await videoService.getUserVideoStream(videoId, deviceFingerprint);
+        console.log('[MuxVideoPlayer] USER stream data received:', data);
+      } else {
+        // Admin mode: Use admin APIs
+        console.log('[MuxVideoPlayer] Loading video in ADMIN mode for videoId:', videoId);
+        data = await videoService.getAdminVideoStream(videoId);
+        console.log('[MuxVideoPlayer] ADMIN stream data received:', data);
       }
       
       setStreamData(data);

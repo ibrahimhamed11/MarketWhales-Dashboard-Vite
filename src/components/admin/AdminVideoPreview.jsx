@@ -15,7 +15,7 @@ import {
 import { MdClose, MdRefresh } from 'react-icons/md';
 import { videoService } from '../../apis/mux/videoApi';
 import Card from '../card/Card';
-import MuxPlayer from '../MuxPlayer';
+import MuxVideoPlayer from '../modal/MuxVideoPlayer';
 
 const AdminVideoPreview = ({ videoId, onClose }) => {
   const textColor = useColorModeValue('secondaryGray.900', 'white');
@@ -48,8 +48,9 @@ const AdminVideoPreview = ({ videoId, onClose }) => {
         
         {/* Video Player */}
         <Box position="relative" w="100%" maxW="800px" mx="auto">
-          <MuxPlayer
+          <MuxVideoPlayer
             videoId={videoId}
+            userMode={false}
             onError={(e) => console.error('Admin Preview Error:', e)}
             style={{
               width: '100%',
