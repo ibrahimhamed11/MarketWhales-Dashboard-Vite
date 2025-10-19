@@ -57,6 +57,40 @@
     "contact": "اتصل بنا",
     "help": "مساعدة"
   },
+  "dashboard": {
+    "title": "نظرة عامة على لوحة التحكم",
+    "subtitle": "راقب إحصائيات ورؤى منصتك",
+    "loadingData": "جاري تحميل بيانات لوحة التحكم...",
+    "stats": {
+      "totalUsers": "إجمالي المستخدمين",
+      "totalOrders": "إجمالي الطلبات",
+      "totalCourses": "عدد الدورات",
+      "totalSignals": "إجمالي الإشارات",
+      "activeUsers": "المستخدمون النشطون",
+      "revenue": "إجمالي الإيرادات"
+    },
+    "charts": {
+      "userRoles": "توزيع أدوار المستخدمين",
+      "userRolesSubtitle": "نظرة عامة على أدوار المستخدمين عبر المنصة",
+      "userGrowth": "نمو المستخدمين عبر الزمن",
+      "userGrowthSubtitle": "إحصائيات التسجيل الشهرية",
+      "userMap": "التوزيع الجغرافي للمستخدمين",
+      "userMapSubtitle": "مواقع المستخدمين",
+      "userRegistrationGrowth": "نمو تسجيل المستخدمين",
+      "registrationStats": "راقب إحصائيات تسجيل المستخدمين الشهرية",
+      "barChartTitle": "نظرة عامة على التسجيل",
+      "barChartSubtitle": "تتبع اتجاهات نمو المستخدمين",
+      "dataDistribution": "توزيع البيانات",
+      "total": "الإجمالي",
+      "noData": "لا توجد بيانات متاحة",
+      "userCount": "المستخدمون"
+    },
+    "errors": {
+      "fetchError": "فشل تحميل بيانات لوحة التحكم",
+      "tryAgain": "حاول مرة أخرى",
+      "noData": "لا توجد بيانات متاحة"
+    }
+  },
   "courseManagement": {
     "title": "لوحة إدارة الدورات",
     "subtitle": "إدارة دوراتك، رفع الفيديوهات، وتتبع تحليلات الأداء",

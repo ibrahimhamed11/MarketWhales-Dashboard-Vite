@@ -1,117 +1,338 @@
-import React, { Component } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import Chart from "react-apexcharts";
+import PropTypes from "prop-types";
+import styles from "./BarChart.module.css";
 
-class ColumnChart extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      chartData: [],
-      chartOptions: {},
-    };
-  }
+const BarChart = ({ 
+  chartData, 
+  chartOptions, 
+  title, 
+  subtitle, 
+  height = "400px",
+  loading = false,
+  error = null,
+  onRetry = null
+}) => {
+  const { t, i18n } = useTranslation();
+  const [isChartReady, setIsChartReady] = useState(false);
 
-  componentDidMount() {
-    this.setState({
-      chartData: this.props.chartData,
-      chartOptions: {
-        ...this.props.chartOptions,
-        chart: {
-          ...this.props.chartOptions.chart,
-          toolbar: {
-            show: false, // Hides the chart toolbar for a cleaner look
-          },
-          background: 'transparent', // Transparent background for better visuals
+  useEffect(() => {
+    if (chartData && chartOptions) {
+      setIsChartReady(true);
+    }
+  }, [chartData, chartOptions]);
+
+  // Memoize chart options for performance
+  const enhancedChartOptions = useMemo(() => {
+    if (!chartOptions) return {};
+
+    const isRTL = i18n.language === 'ar';
+
+    return {
+      ...chartOptions,
+      chart: {
+        ...chartOptions.chart,
+        toolbar: {
+          show: false,
         },
-        plotOptions: {
-          bar: {
-            borderRadius: 10, // Smooth rounded edges
-            horizontal: false,
-            dataLabels: {
-              position: "top", // Show data labels at the top of the bars
-            },
-          },
-        },
-        dataLabels: {
+        background: 'transparent',
+        animations: {
           enabled: true,
-          formatter: (val) => {
-            return val;
+          easing: 'easeinout',
+          speed: 800,
+          animateGradually: {
+            enabled: true,
+            delay: 150
           },
-          offsetY: -20,
-          style: {
-            fontSize: "12px",
-            colors: ["#304758"], // Style data labels with a darker color for contrast
-          },
+          dynamicAnimation: {
+            enabled: true,
+            speed: 350
+          }
         },
-        xaxis: {
-          categories: this.props.chartOptions.xaxis.categories,
-          position: "bottom",
-          axisBorder: {
-            show: true,
-            color: "#78909C",
+        fontFamily: isRTL ? 'Cairo, sans-serif' : 'Inter, system-ui, sans-serif',
+      },
+      plotOptions: {
+        bar: {
+          borderRadius: 8,
+          horizontal: false,
+          columnWidth: '60%',
+          dataLabels: {
+            position: "top",
           },
-          axisTicks: {
-            show: true,
-            color: "#78909C",
-          },
-          labels: {
-            style: {
-              colors: "#546E7A", // Custom x-axis label color
-              fontSize: "14px", // Font size for the x-axis labels
-            },
-          },
-        },
-        yaxis: {
-          labels: {
-            style: {
-              colors: "#546E7A", // Custom y-axis label color
-              fontSize: "14px", // Font size for the y-axis labels
-            },
-          },
-        },
-        fill: {
-          colors: ['#1E90FF'], // New modern color for bars (use a gradient for a better effect)
-          type: 'gradient',
-          gradient: {
-            shade: 'light',
-            type: 'horizontal',
-            shadeIntensity: 0.25,
-            gradientToColors: ['#00C9FF'], // Gradient transition color
-            inverseColors: true,
-            opacityFrom: 0.9,
-            opacityTo: 0.9,
-            stops: [0, 100],
-          },
-        },
-        tooltip: {
-          theme: 'dark', // Dark theme for tooltips for better visibility
-          marker: {
-            show: true,
-          },
-          x: {
-            show: true,
-          },
-        },
-        grid: {
-          borderColor: "#E0E0E0", // Subtle grid lines for better visuals
+          distributed: false,
         },
       },
-    });
-  }
+      dataLabels: {
+        enabled: true,
+        formatter: (val) => {
+          return val ? val.toLocaleString() : '0';
+        },
+        offsetY: -25,
+        style: {
+          fontSize: "13px",
+          fontWeight: 700,
+          colors: ["#2c5282"],
+        },
+        background: {
+          enabled: true,
+          foreColor: '#ffffff',
+          padding: 8,
+          borderRadius: 6,
+          borderWidth: 1,
+          borderColor: '#63b3ed',
+          opacity: 0.95,
+          dropShadow: {
+            enabled: true,
+            top: 2,
+            left: 2,
+            blur: 4,
+            color: '#000',
+            opacity: 0.15
+          }
+        }
+      },
+      xaxis: {
+        categories: chartOptions.xaxis?.categories || [],
+        position: "bottom",
+        axisBorder: {
+          show: true,
+          color: "#63b3ed",
+          height: 2,
+        },
+        axisTicks: {
+          show: true,
+          color: "#63b3ed",
+          height: 6,
+        },
+        labels: {
+          style: {
+            colors: ['#4299e1', '#48bb78', '#ed8936', '#9f7aea', '#f56565', '#38b2ac', '#4299e1', '#48bb78', '#ed8936', '#9f7aea', '#f56565', '#38b2ac'],
+            fontSize: "14px",
+            fontWeight: 700,
+            cssClass: 'month-label',
+          },
+          rotate: -45,
+          rotateAlways: false,
+          trim: false,
+          hideOverlappingLabels: false,
+          offsetY: 0,
+          offsetX: 0,
+        },
+        tooltip: {
+          enabled: true
+        },
+        crosshairs: {
+          show: true,
+          stroke: {
+            color: '#63b3ed',
+            width: 2,
+            dashArray: 0
+          }
+        }
+      },
+      yaxis: {
+        labels: {
+          style: {
+            colors: ["#63b3ed"],
+            fontSize: "13px",
+            fontWeight: 600,
+          },
+          formatter: (val) => {
+            return val ? val.toLocaleString() : '0';
+          }
+        },
+        title: {
+          text: t('dashboard.charts.userCount') || 'Users',
+          rotate: -90,
+          offsetX: 0,
+          offsetY: 0,
+          style: {
+            color: '#4299e1',
+            fontSize: '14px',
+            fontWeight: 700,
+          }
+        }
+      },
+      fill: {
+        type: 'gradient',
+        gradient: {
+          shade: 'light',
+          type: 'vertical',
+          shadeIntensity: 0.5,
+          gradientToColors: ['#63b3ed', '#4299e1'],
+          inverseColors: false,
+          opacityFrom: 0.95,
+          opacityTo: 0.85,
+          stops: [0, 100],
+        },
+      },
+      tooltip: {
+        theme: 'light',
+        marker: {
+          show: true,
+        },
+        y: {
+          formatter: (val) => {
+            return val ? val.toLocaleString() : '0';
+          }
+        },
+        style: {
+          fontSize: '13px',
+          fontFamily: isRTL ? 'Cairo, sans-serif' : 'Inter, system-ui, sans-serif',
+        }
+      },
+      grid: {
+        borderColor: "#bee3f8",
+        strokeDashArray: 4,
+        xaxis: {
+          lines: {
+            show: false
+          }
+        },
+        yaxis: {
+          lines: {
+            show: true
+          }
+        },
+        padding: {
+          top: 0,
+          right: 10,
+          bottom: 0,
+          left: 10
+        }
+      },
+      colors: ['#63b3ed'],
+      states: {
+        hover: {
+          filter: {
+            type: 'lighten',
+            value: 0.1,
+          }
+        },
+        active: {
+          filter: {
+            type: 'darken',
+            value: 0.1,
+          }
+        }
+      },
+      responsive: [
+        {
+          breakpoint: 768,
+          options: {
+            plotOptions: {
+              bar: {
+                columnWidth: '70%'
+              }
+            },
+            xaxis: {
+              labels: {
+                rotate: -45,
+                style: {
+                  fontSize: '11px'
+                }
+              }
+            }
+          }
+        },
+        {
+          breakpoint: 480,
+          options: {
+            plotOptions: {
+              bar: {
+                columnWidth: '80%'
+              }
+            },
+            dataLabels: {
+              style: {
+                fontSize: '10px'
+              }
+            }
+          }
+        }
+      ]
+    };
+  }, [chartOptions, i18n.language]);
 
-  render() {
+  // Display loading state
+  if (loading) {
     return (
-      <div style={{ padding: "20px", backgroundColor: "#f4f6f9", borderRadius: "10px", boxShadow: "0 4px 8px rgba(0,0,0,0.1)" }}>
-        <h2 style={{ textAlign: "center", color: "#1E90FF", marginBottom: "10px" }}>User Registration Growth</h2>
-        <Chart
-          options={this.state.chartOptions}
-          series={this.state.chartData}
-          type="bar"
-          width="100%"
-          height="400px" 
-        />
+      <div className={styles.chartContainer}>
+        <div className={styles.chartHeader}>
+          <h2 className={styles.chartTitle}>
+            {title || t('dashboard.charts.userRegistrationGrowth')}
+          </h2>
+          <p className={styles.chartSubtitle}>
+            {subtitle || t('dashboard.charts.registrationStats')}
+          </p>
+        </div>
+        <div className={styles.loadingContainer}>
+          <div className={styles.loadingSpinner}></div>
+        </div>
       </div>
     );
   }
-}
 
-export default ColumnChart;
+  // Display error state
+  if (error) {
+    return (
+      <div className={styles.chartContainer}>
+        <div className={styles.chartHeader}>
+          <h2 className={styles.chartTitle}>
+            {title || t('dashboard.charts.userRegistrationGrowth')}
+          </h2>
+          <p className={styles.chartSubtitle}>
+            {subtitle || t('dashboard.charts.registrationStats')}
+          </p>
+        </div>
+        <div className={styles.errorContainer}>
+          <p className={styles.errorMessage}>{error}</p>
+          {onRetry && (
+            <button className={styles.retryButton} onClick={onRetry}>
+              {t('common.tryAgain')}
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Display chart
+  return (
+    <div className={styles.chartContainer}>
+      <div className={styles.chartHeader}>
+        <h2 className={styles.chartTitle}>
+          {title || t('dashboard.charts.userRegistrationGrowth')}
+        </h2>
+        <p className={styles.chartSubtitle}>
+          {subtitle || t('dashboard.charts.registrationStats')}
+        </p>
+      </div>
+      <div className={styles.chartWrapper}>
+        {isChartReady && (
+          <Chart
+            options={enhancedChartOptions}
+            series={chartData}
+            type="bar"
+            width="100%"
+            height={height}
+          />
+        )}
+      </div>
+    </div>
+  );
+};
+
+BarChart.propTypes = {
+  chartData: PropTypes.array.isRequired,
+  chartOptions: PropTypes.object.isRequired,
+  title: PropTypes.string,
+  subtitle: PropTypes.string,
+  height: PropTypes.string,
+  loading: PropTypes.bool,
+  error: PropTypes.string,
+  onRetry: PropTypes.func,
+};
+
+export default BarChart;

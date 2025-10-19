@@ -57,6 +57,40 @@
     "contact": "Contact",
     "help": "Help"
   },
+  "dashboard": {
+    "title": "Dashboard Overview",
+    "subtitle": "Monitor your platform statistics and insights",
+    "loadingData": "Loading dashboard data...",
+    "stats": {
+      "totalUsers": "Total Users",
+      "totalOrders": "Total Orders",
+      "totalCourses": "Number of Courses",
+      "totalSignals": "Total Signals",
+      "activeUsers": "Active Users",
+      "revenue": "Total Revenue"
+    },
+    "charts": {
+      "userRoles": "User Roles Distribution",
+      "userRolesSubtitle": "Overview of user roles across the platform",
+      "userGrowth": "User Growth Over Time",
+      "userGrowthSubtitle": "Monthly registration statistics",
+      "userMap": "User Geographic Distribution",
+      "userMapSubtitle": "Where your users are located",
+      "userRegistrationGrowth": "User Registration Growth",
+      "registrationStats": "Monitor monthly user registration statistics",
+      "barChartTitle": "Registration Overview",
+      "barChartSubtitle": "Track user growth trends",
+      "dataDistribution": "Data Distribution",
+      "total": "Total",
+      "noData": "No data available",
+      "userCount": "Users"
+    },
+    "errors": {
+      "fetchError": "Failed to load dashboard data",
+      "tryAgain": "Try again",
+      "noData": "No data available"
+    }
+  },
   "courseManagement": {
     "title": "Course Management Dashboard",
     "subtitle": "Manage your courses, upload videos, and track performance analytics",
